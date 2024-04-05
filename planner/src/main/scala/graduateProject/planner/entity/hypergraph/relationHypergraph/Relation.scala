@@ -14,10 +14,10 @@ abstract class Relation extends HyperGraphEdge[Variable] {
 
   final def getVariables():Set[Variable]=this.getNodes
 
-  override def hashCode(): Int = getRelationId().##
+  override def hashCode(): Int = getRelationId.##
 
   override def equals(obj: Any): Boolean = obj match {
-    case that: Relation => that.getRelationId() == this.getRelationId()
+    case that: Relation => that.getRelationId == this.getRelationId
     case _ => false
   }
 }

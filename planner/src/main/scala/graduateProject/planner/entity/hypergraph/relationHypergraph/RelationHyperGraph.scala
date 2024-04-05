@@ -1,6 +1,6 @@
 package graduateProject.planner.entity.hypergraph.relationHypergraph
 
-import graduateProject.planner.entity.JoinTree.JoinTreeEdge
+import graduateProject.planner.entity.joinTree.JoinTreeEdge
 import graduateProject.planner.entity.hypergraph.{HyperGraph, HyperGraphEdge}
 import graduateProject.planner.entity.query.Query
 
@@ -32,26 +32,55 @@ class RelationHyperGraph(val nodeSet:Set[Variable],val edgeSet:Set[Relation]) ex
   }
 
   def getEars:Set[JoinTreeEdge]={
+
     val result=new ArrayBuffer[JoinTreeEdge]()
     for(potentialEar<-this.edgeSet){
-      val
+      val thisVariableSet=potentialEar.getVariables()
+      for(potentialWitness<-this.edgeSet if !potentialEar.equals(potentialWitness)){
+        val otherVariableSet=potentialWitness.getVariables()
+        if((thisVariableSet&otherVariableSet).nonEmpty) {
+          val restVariables = thisVariableSet &~ (thisVariableSet & otherVariableSet)
+          var flag = true
+          for (otherRelation <- this.edgeSet if !(potentialEar.equals(otherRelation) || potentialWitness.equals(otherRelation))) {
+            if (restVariables.subsetOf(otherRelation.getVariables())) {
+              flag = false
+            }
+          }
+          if (flag) {
+            result.append(JoinTreeEdge(potentialWitness, potentialEar, thisVariableSet & otherVariableSet))
+          }
+        }
+      }
     }
+    result.toSet
+  }
+
+  def isAcyclic:Boolean={
+    var curGraph=this
+    while(curGraph.getEdges.size>1){
+      val ears=curGraph.getEars
+      if(ears.nonEmpty){
+        val ear=ears.head.son
+        curGraph=curGraph.removeEdge(ear)
+      }
+      else return false
+    }
+    true
   }
 
   override def toString: String = {
     val builder=new mutable.StringBuilder()
     builder.append("nodes:\r\n")
     for(node<-getNodes){
-      builder.append("\t").append(node.toString).append("\r\n")
+      builder.append("\t").append(node.toString)
     }
     builder.append("edges:\r\n")
     for(edge<-getEdges){
-      builder.append("\t").append(edge.toString)
+      builder.append("\t").append(edge.toString).append("\r\n")
     }
     builder.append("\r\n")
     builder.toString()
   }
-
 
 }
 

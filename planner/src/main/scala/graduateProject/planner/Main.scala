@@ -4,8 +4,9 @@ import graduateProject.parser
 import graduateProject.parser.CatalogManager
 import graduateProject.parser.implLib.SQLParser
 import graduateProject.parser.plan.SqlPlanner
-import graduateProject.planner.algorithm.RelNodeToQuery
+import graduateProject.planner.algorithm.{GYO, RelNodeToQuery}
 import graduateProject.planner.entity.hypergraph.relationHypergraph.RelationHyperGraph
+import graduateProject.planner.entity.joinTree.JoinTree
 import org.apache.calcite.rel.RelNode
 import org.apache.calcite.sql.{SqlNode, SqlNodeList}
 object Main {
@@ -20,9 +21,7 @@ object Main {
     val root = crownPlanner.toLogicalPlan(tmp)
     val query=RelNodeToQuery.convert(root)
     val hyperGraph=RelationHyperGraph.constructFromQuery(query)
-    println(hyperGraph)
-    val edge=hyperGraph.getEdges.head
-    println(hyperGraph.removeEdge(edge))
+    val joinTreeSet=GYO(hyperGraph)
   }
 
 }
