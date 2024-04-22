@@ -7,7 +7,7 @@ import graduateProject.planner.entity.query.Query
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-class RelationHyperGraph(val nodeSet:Set[Variable],val edgeSet:Set[Relation]) extends HyperGraph[Variable,Relation] {
+class RelationHyperGraph(var nodeSet:Set[Variable],var edgeSet:Set[Relation]) extends HyperGraph[Variable,Relation] {
   def removeEdge(edge: Relation): RelationHyperGraph = {
     val oldNodeSet = this.getNodes
     val oldEdgeSet = this.getEdges

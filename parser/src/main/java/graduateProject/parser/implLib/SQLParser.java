@@ -1,6 +1,6 @@
 package graduateProject.parser.implLib;
 
-import graduateProject.impl.ParserImpl;
+import graduateProject.parser.impl.ParserImpl;
 import org.apache.calcite.config.Lex;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;

@@ -12,6 +12,7 @@ class ComparisonHyperGraph( val joinTree:JoinTree,edges:Set[ComparisonHyperGraph
   override var edgeSet: Set[ComparisonHyperGraphEdge] = edges
   override var nodeSet: Set[JoinTreeEdge] = nodes
 
+  override def toString: String = nodeSet.toString()+"\r\n"+edgeSet.toString()
   def degree:Int={
     2
   }

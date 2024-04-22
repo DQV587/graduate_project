@@ -4,7 +4,7 @@ import graduateProject.parser
 import graduateProject.parser.CatalogManager
 import graduateProject.parser.implLib.SQLParser
 import graduateProject.parser.plan.SqlPlanner
-import graduateProject.planner.algorithm.{GYO, RelNodeToQuery}
+import graduateProject.planner.algorithm.{GYO, JoinTreeToComparisonHyperGraph, RelNodeToQuery}
 import graduateProject.planner.entity.hypergraph.relationHypergraph.RelationHyperGraph
 import graduateProject.planner.entity.joinTree.JoinTree
 import org.apache.calcite.rel.RelNode
@@ -23,6 +23,8 @@ object Main {
     val hyperGraph=RelationHyperGraph.constructFromQuery(query)
     val joinTreeSet=GYO(hyperGraph)
     println(joinTreeSet)
+    val comparisonHyperGraph=JoinTreeToComparisonHyperGraph(joinTreeSet.head,query.comparisons.toSet)
+    println(comparisonHyperGraph)
   }
 
 }

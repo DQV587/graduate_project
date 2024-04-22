@@ -52,7 +52,7 @@ class JoinTree(var nodeSet: Set[Relation], var edgeSet: Set[JoinTreeEdge]) {
   override def toString: String = {
     val builder=new mutable.StringBuilder()
     for(edge<-edgeSet){
-      builder.append(edge.son.getRelationId()).append("->").append(edge.father.getRelationId()).append(":").append(edge.sharedVariable).append("\r\n")
+      builder.append(edge.toString).append(":").append(edge.sharedVariable).append("\r\n")
     }
     builder.toString()
   }
@@ -70,6 +70,6 @@ object JoinTree{
 
 case class JoinTreeEdge(father:Relation,son:Relation,sharedVariable:Set[Variable]){
   override def toString: String = {
-    "Father:\r\n"+father.toString+"\r\nSon:\r\n"+son.toString+"\r\n"
+    "Father: "+father.getRelationId()+" Son: "+son.getRelationId()
   }
 }

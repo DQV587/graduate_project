@@ -10,8 +10,16 @@ class ComparisonHyperGraphEdge(val comparison: Comparison,edges:Set[JoinTreeEdge
   var leftRelation:Option[Relation]=left
   var rightRelation:Option[Relation]=right
   def isLongComparison:Boolean=this.edges.size>1
-  //the relation to reduced is a leaf of the join tree, so there is only one edge whose son is exactly the relation.
 
+  //the relation to reduced is a leaf of the join tree, so there is only one edge whose son is exactly the relation.
+  override def toString: String = {
+    val builder=new StringBuilder()
+    builder.append("left relation:\r\n").append(leftRelation.get).append("\r\n")
+    builder.append("right relation:\r\n").append(rightRelation.get).append("\r\n")
+    builder.append(comparison.toString).append("\r\n")
+    builder.append(nodeSet.toString())
+    builder.toString()
+  }
   def reduceIncidentRelation(isLeft:Boolean):Unit={
     val reducedRelation=if(isLeft) leftRelation.get else rightRelation.get
     var newIncidentRelation=reducedRelation

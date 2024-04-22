@@ -28,7 +28,8 @@ object JoinTreeToComparisonHyperGraph {
       val path=DFS(leftRelation,rightRelation,relationJoinTreeEdgeMap)
       new ComparisonHyperGraphEdge(comparison = comparison, edges = path, left = leftRelation, right = rightRelation)
     })
-
+    val nodeSet=joinTree.edgeSet
+    new ComparisonHyperGraph(joinTree,edgeSet,nodeSet)
   }
   def DFS(from:Option[Relation],to:Option[Relation],edgeMap:mutable.Map[Relation,Set[JoinTreeEdge]]):Set[JoinTreeEdge]= {
     if (from.isEmpty || to.isEmpty) Set[JoinTreeEdge]()
