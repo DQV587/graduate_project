@@ -22,6 +22,7 @@ object Main {
     val query=RelNodeToQuery.convert(root)
     val hyperGraph=RelationHyperGraph.constructFromQuery(query)
     val joinTreeSet=GYO(hyperGraph)
+    println(joinTreeSet)
   }
 
 }

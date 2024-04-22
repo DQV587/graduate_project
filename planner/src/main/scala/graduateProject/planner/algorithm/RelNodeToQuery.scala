@@ -11,7 +11,6 @@ import org.apache.calcite.rel.logical.{LogicalAggregate, LogicalFilter, LogicalJ
 import org.apache.calcite.rex.{RexCall, RexInputRef, RexLiteral, RexNode}
 import org.apache.calcite.util.NlsString
 
-import scala.annotation.tailrec
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.collection.JavaConversions._
 

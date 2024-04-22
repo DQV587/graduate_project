@@ -2,8 +2,8 @@ package graduateProject.planner.entity.hypergraph
 
 trait HyperGraph[V, E <: HyperGraphEdge[V]] {
 
-  val nodeSet: Set[V]
-  val edgeSet: Set[E]
+  var nodeSet: Set[V]
+  var edgeSet: Set[E]
 
   def addNode(node: V): Unit = this.nodeSet + node
 

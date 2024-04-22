@@ -4,10 +4,43 @@ import graduateProject.planner.entity
 import graduateProject.planner.entity.hypergraph.relationHypergraph.{Relation, Variable}
 
 import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
-class JoinTree(val nodeSet: Set[Relation], val edgeSet: Set[JoinTreeEdge]) {
+class JoinTree(var nodeSet: Set[Relation], var edgeSet: Set[JoinTreeEdge]) {
   def isEmpty:Boolean=this.nodeSet.isEmpty
 
+  def getLeafs:Set[Relation]={
+    val buffer=new ArrayBuffer[Relation]()
+    for(relation<-nodeSet){
+      var flag=true
+      for(edge<-edgeSet){
+        if(edge.father.equals(relation)){
+          flag=false
+        }
+      }
+      if(flag){
+        buffer.append(relation)
+      }
+    }
+    buffer.toSet
+  }
+  def isLeaf(input:Relation):Boolean={
+    if(!nodeSet.contains(input)) false
+    else{
+      for(edge<-edgeSet){
+        if(edge.father.equals(input)) return false
+      }
+      true
+    }
+  }
+  def removeLeaf(leaf:Relation):Unit={
+    if(isLeaf(leaf)){
+      this.nodeSet=this.nodeSet-leaf
+      for(edge<-edgeSet if edge.son.equals(leaf)){
+        this.edgeSet=this.edgeSet-edge
+      }
+    }
+  }
   override def equals(obj: Any): Boolean = {
     if(!obj.isInstanceOf[JoinTree]) false
     else{

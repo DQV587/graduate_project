@@ -14,10 +14,11 @@ abstract class Relation extends HyperGraphEdge[Variable] {
 
   final def getVariables():Set[Variable]=this.getNodes
 
-  override def hashCode(): Int = getRelationId.##
+
+  override def hashCode(): Int = getRelationId().##
 
   override def equals(obj: Any): Boolean = obj match {
-    case that: Relation => that.getRelationId == this.getRelationId
+    case that: Relation => that.getRelationId() == this.getRelationId()
     case _ => false
   }
 }
@@ -46,7 +47,7 @@ class AggregatedRelation(val tableName: String, val variables: Set[Variable],
     s"AggregatedRelation[id=${getRelationId()}][source=$tableName][cols=$columns][group=$groups][func=$func]"
   }
 
-  override val nodeSet: Set[Variable] = variables
+  var nodeSet: Set[Variable] = variables
 }
 class TableScanRelation(val tableName: String, val variables: Set[Variable]) extends Relation {
 
@@ -57,5 +58,5 @@ class TableScanRelation(val tableName: String, val variables: Set[Variable]) ext
     s"TableScanRelation[id=${getRelationId()}][source=$tableName][cols=$columns]"
   }
 
-  override val nodeSet: Set[Variable] = variables
+  var nodeSet: Set[Variable] = variables
 }
