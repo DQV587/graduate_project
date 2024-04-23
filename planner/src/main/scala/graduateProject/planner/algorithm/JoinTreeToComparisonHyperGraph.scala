@@ -16,8 +16,8 @@ object JoinTreeToComparisonHyperGraph {
       relationJoinTreeEdgeMapBuffer.put(relation,ArrayBuffer[JoinTreeEdge]())
     }
     for(edge<-joinTree.edgeSet){
-      relationJoinTreeEdgeMapBuffer(edge.son).append(edge)
-      relationJoinTreeEdgeMapBuffer(edge.father).append(edge)
+      relationJoinTreeEdgeMapBuffer(edge.relation2).append(edge)
+      relationJoinTreeEdgeMapBuffer(edge.relation1).append(edge)
     }
     val relationJoinTreeEdgeMap=relationJoinTreeEdgeMapBuffer.map(x=>(x._1,x._2.toSet))
     val edgeSet=comparisons.map(comparison=>{
@@ -48,7 +48,7 @@ object JoinTreeToComparisonHyperGraph {
         val curEdgeSetToTraversal=edgeMap(curNodeToVisit)
         var goDeeper=false
         for(edge<-curEdgeSetToTraversal){
-          val theOtherNode=(if(edge.father.equals(curNodeToVisit)) edge.son else edge.father)
+          val theOtherNode=(if(edge.relation1.equals(curNodeToVisit)) edge.relation2 else edge.relation1)
           if(!visited.contains(theOtherNode)) {
             stk.push(theOtherNode)
             goDeeper = true
@@ -68,7 +68,7 @@ object JoinTreeToComparisonHyperGraph {
       var curNode=left
       while(!curNode.equals(right)){
         for(edge<-edgeMap(curNode)){
-          val theOtherNode=(if(edge.father.equals(curNode)) edge.son else edge.father)
+          val theOtherNode=(if(edge.relation1.equals(curNode)) edge.relation2 else edge.relation1)
           if(nodesInPath.contains(theOtherNode)) {
             edgeBuffer.append(edge)
             nodesInPath=nodesInPath-curNode

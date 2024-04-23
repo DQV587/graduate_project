@@ -10,37 +10,26 @@ class JoinTree(var nodeSet: Set[Relation], var edgeSet: Set[JoinTreeEdge]) {
   def isEmpty:Boolean=this.nodeSet.isEmpty
 
   def getLeafs:Set[Relation]={
-    val buffer=new ArrayBuffer[Relation]()
-    for(relation<-nodeSet){
-      var flag=true
-      for(edge<-edgeSet){
-        if(edge.father.equals(relation)){
-          flag=false
-        }
-      }
-      if(flag){
-        buffer.append(relation)
-      }
-    }
-    buffer.toSet
+    nodeSet.filter(relation=>{
+      isLeaf(relation)
+    })
   }
   def isLeaf(input:Relation):Boolean={
     if(!nodeSet.contains(input)) false
     else{
-      for(edge<-edgeSet){
-        if(edge.father.equals(input)) return false
-      }
-      true
+      if(edgeSet.count(edge=>edge.isRelatedToRelation(input))>1) false
+      else true
     }
   }
   def removeLeaf(leaf:Relation):Unit={
     if(isLeaf(leaf)){
       this.nodeSet=this.nodeSet-leaf
-      for(edge<-edgeSet if edge.son.equals(leaf)){
+      for(edge<-edgeSet if edge.isRelatedToRelation(leaf)){
         this.edgeSet=this.edgeSet-edge
       }
     }
   }
+//  override def clone(): JoinTree = super.clone()
   override def equals(obj: Any): Boolean = {
     if(!obj.isInstanceOf[JoinTree]) false
     else{
@@ -63,13 +52,17 @@ object JoinTree{
     new JoinTree(Set[Relation](),Set[JoinTreeEdge]())
   }
   def newJoinTree(oldTree:JoinTree,newEdge:JoinTreeEdge):JoinTree={
-      new JoinTree(oldTree.nodeSet++Set(newEdge.son,newEdge.father),oldTree.edgeSet+newEdge)
+      new JoinTree(oldTree.nodeSet++Set(newEdge.relation2,newEdge.relation1),oldTree.edgeSet+newEdge)
   }
+//  def reduceIsomorphismJoinTrees(joinTreeSet:Set[JoinTree]):Set[JoinTree]={
+//
+//  }
 }
 
 
-case class JoinTreeEdge(father:Relation,son:Relation,sharedVariable:Set[Variable]){
+case class JoinTreeEdge(relation1:Relation, relation2:Relation, sharedVariable:Set[Variable]){
   override def toString: String = {
-    "Father: "+father.getRelationId()+" Son: "+son.getRelationId()
+    "Father: "+relation1.getRelationId()+" Son: "+relation2.getRelationId()
   }
+  def isRelatedToRelation(relation: Relation):Boolean=relation1.equals(relation)||relation2.equals(relation)
 }

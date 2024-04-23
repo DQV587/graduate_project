@@ -18,7 +18,7 @@ object GYO {
         if(curState.hyperGraph.getEdges.size>1){
           val ears=curState.hyperGraph.getEars
           for(ear<-ears){
-            val newGraph=curState.hyperGraph.removeEdge(ear.son)
+            val newGraph=curState.hyperGraph.removeEdge(ear.relation2)
             val newJoinTree=JoinTree.newJoinTree(curState.joinTree,ear)
             tmpStack=tmpStack:+GyoState(newGraph,newJoinTree)
           }

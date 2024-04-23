@@ -27,7 +27,8 @@ object Main {
     val comparisonHyperGraph=JoinTreeToComparisonHyperGraph(joinTreeSet.head,query.comparisons.toSet)
     println(comparisonHyperGraph)
     println(comparisonHyperGraph.degree)
-    println(comparisonHyperGraph.relationComparisonsMap)
+//    println(comparisonHyperGraph.relationComparisonsMap)
+    println(comparisonHyperGraph.getReducibleRelations())
   }
 
 }

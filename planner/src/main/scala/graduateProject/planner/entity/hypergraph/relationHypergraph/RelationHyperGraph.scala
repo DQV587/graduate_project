@@ -60,7 +60,7 @@ class RelationHyperGraph(var nodeSet:Set[Variable],var edgeSet:Set[Relation]) ex
     while(curGraph.getEdges.size>1){
       val ears=curGraph.getEars
       if(ears.nonEmpty){
-        val ear=ears.head.son
+        val ear=ears.head.relation2
         curGraph=curGraph.removeEdge(ear)
       }
       else return false

@@ -33,12 +33,17 @@ class ComparisonHyperGraph( val joinTree:JoinTree,edges:Set[ComparisonHyperGraph
     true
   }
   def getReducibleRelations():Set[Relation]={
-
+    joinTree.getLeafs.filter(x=>isReducible(x))
   }
   def isReducible(relation:Relation):Boolean={
-
+    if(relationComparisonsMap(relation).size<2) true
+    else{
+      val comparisonSet=relationComparisonsMap(relation)
+      comparisonSet.count(comparison=>comparison.isLongComparison)<=1
+    }
   }
   def reduce(relation: Relation):Unit={
+    assert(isReducible(relation))
 
   }
 }
