@@ -34,15 +34,24 @@ class JoinTree(var nodeSet: Set[Relation], var edgeSet: Set[JoinTreeEdge]) {
     if(!obj.isInstanceOf[JoinTree]) false
     else{
       val that=obj.asInstanceOf[JoinTree]
-      if((!that.nodeSet.equals(this.nodeSet))||(!that.edgeSet.equals(this.edgeSet))) false
+      if(!that.nodeSet.equals(this.nodeSet)) {
+        nodeSet.forall(relation=>{
+          val relatedEdgeInThis=this.edgeSet.filter(edge=>edge.isRelatedToRelation(relation))
+          val relatedEdgeInThat=that.edgeSet.filter(edge=>edge.isRelatedToRelation(relation))
+          if(relatedEdgeInThis.size!=relatedEdgeInThat.size) false
+          else{
+            relatedEdgeInThis.map(edge=>edge.getOtherRelation(relation)).equals(
+              relatedEdgeInThat.map(edge=>edge.getOtherRelation(relation)))
+          }
+        })
+      }
       else true
     }
   }
   override def toString: String = {
     val builder=new mutable.StringBuilder()
-    for(edge<-edgeSet){
-      builder.append(edge.toString).append(":").append(edge.sharedVariable).append("\r\n")
-    }
+    edgeSet.foreach(edge=>
+      builder.append(edge.toString).append(":").append(edge.sharedVariable).append("\r\n"))
     builder.toString()
   }
 }
@@ -54,15 +63,17 @@ object JoinTree{
   def newJoinTree(oldTree:JoinTree,newEdge:JoinTreeEdge):JoinTree={
       new JoinTree(oldTree.nodeSet++Set(newEdge.relation2,newEdge.relation1),oldTree.edgeSet+newEdge)
   }
-//  def reduceIsomorphismJoinTrees(joinTreeSet:Set[JoinTree]):Set[JoinTree]={
-//
-//  }
+
 }
 
 
 case class JoinTreeEdge(relation1:Relation, relation2:Relation, sharedVariable:Set[Variable]){
   override def toString: String = {
-    "Father: "+relation1.getRelationId()+" Son: "+relation2.getRelationId()
+    "(Relation1: "+relation1.getRelationId()+" Relation2: "+relation2.getRelationId()+")"
   }
   def isRelatedToRelation(relation: Relation):Boolean=relation1.equals(relation)||relation2.equals(relation)
+  def getOtherRelation(relation: Relation):Relation={
+    assert(isRelatedToRelation(relation))
+    if(relation1.equals(relation)) relation2 else relation1
+  }
 }

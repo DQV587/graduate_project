@@ -21,7 +21,7 @@ class ComparisonHyperGraph( val joinTree:JoinTree,edges:Set[ComparisonHyperGraph
     })
     map
   }
-  override def toString: String = nodeSet.toString()+"\r\n"+edgeSet.toString()
+  override def toString: String = "nodes:\r\n"+nodeSet.toString()+"\r\ncomparisons:\r\n"+edgeSet.toString()
   def degree:Int={
     nodeSet.map(node=>{
       edgeSet.count(edge => {

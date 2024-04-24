@@ -26,11 +26,8 @@ class ComparisonHyperGraphEdge(val comparison: Comparison,edges:Set[JoinTreeEdge
   def reduceIncidentRelation(isLeft:Boolean):JoinTreeEdge={
     val reducedRelation=if(isLeft) leftRelation.get else rightRelation.get
     val joinTreeEdgeToReduced=nodeSet.filter(node=>node.isRelatedToRelation(reducedRelation)).head
-    val newIncidentRelation={
-      if(joinTreeEdgeToReduced.relation1.equals(reducedRelation)) joinTreeEdgeToReduced.relation2
-      else joinTreeEdgeToReduced.relation1
-    }
-    //    one jointree edge can occur in many comparisons
+    val newIncidentRelation=joinTreeEdgeToReduced.getOtherRelation(reducedRelation)
+    // one jointree edge can occur in many comparisons
     // for long comparisons the variable in the comparison is needed to preserve in the father relation
     if(this.isLongComparison) newIncidentRelation.addNodes(if(isLeft) comparison.left.getVariables else comparison.right.getVariables)
     if(isLeft) leftRelation=Some(newIncidentRelation)
