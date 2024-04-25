@@ -36,25 +36,24 @@ object Relation {
   def newAggregateRelation(tableName: String,variables: Set[Variable],group: List[Int],func: String):AggregatedRelation=
     new AggregatedRelation(tableName, variables, group, func)
 }
-class AggregatedRelation(val tableName: String, val variables: Set[Variable],
+class AggregatedRelation(val tableName: String, variables: Set[Variable],
                          val group: List[Int], val func: String) extends Relation {
-
   override def getTableName(): String = tableName
 
   override def toString: String = {
-    val columns = variables.map(n => n.name + ":" + n.dataType).mkString("(", ",", ")")
+    val columns = nodeSet.map(n => n.name + ":" + n.dataType).mkString("(", ",", ")")
     val groups = group.mkString("(", ",", ")")
     s"AggregatedRelation[id=${getRelationId()}][source=$tableName][cols=$columns][group=$groups][func=$func]"
   }
 
   var nodeSet: Set[Variable] = variables
 }
-class TableScanRelation(val tableName: String, val variables: Set[Variable]) extends Relation {
+class TableScanRelation(val tableName: String, variables: Set[Variable]) extends Relation {
 
   def getTableName(): String = tableName
 
   override def toString: String = {
-    val columns = variables.map(n => n.name + ":" + n.dataType).mkString("(", ",", ")")
+    val columns = nodeSet.map(n => n.name + ":" + n.dataType).mkString("(", ",", ")")
     s"TableScanRelation[id=${getRelationId()}][source=$tableName][cols=$columns]"
   }
 

@@ -14,7 +14,7 @@
         <module>basicLib</module>
         <module>cli</module>
         <module>parser</module>
-        <module>example</module>
+        <module>experiment</module>
     </modules>
 
     <properties>

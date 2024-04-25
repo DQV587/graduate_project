@@ -6,7 +6,6 @@ import graduateProject.planner.entity.hypergraph.relationHypergraph.Relation
 import graduateProject.planner.entity.joinTree.{JoinTree, JoinTreeEdge}
 
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 
 class ComparisonHyperGraph( val joinTree:JoinTree,edges:Set[ComparisonHyperGraphEdge],nodes:Set[JoinTreeEdge]) extends HyperGraph[JoinTreeEdge,ComparisonHyperGraphEdge]{
 
@@ -14,8 +13,8 @@ class ComparisonHyperGraph( val joinTree:JoinTree,edges:Set[ComparisonHyperGraph
   override var nodeSet: Set[JoinTreeEdge] = nodes
   val relationComparisonsMap: mutable.Map[Relation, mutable.Set[ComparisonHyperGraphEdge]] = {
     val map = mutable.Map[Relation, mutable.Set[ComparisonHyperGraphEdge]]()
-    joinTree.nodeSet.map(relation=>map.put(relation, mutable.Set[ComparisonHyperGraphEdge]()))
-    edges.filter(edge=>(edge.leftRelation.nonEmpty && edge.rightRelation.nonEmpty)).map(edge=>{
+    joinTree.nodeSet.foreach(relation=>map.put(relation, mutable.Set[ComparisonHyperGraphEdge]()))
+    edges.filter(edge=>(edge.leftRelation.nonEmpty && edge.rightRelation.nonEmpty)).foreach(edge=>{
       map(edge.leftRelation.get).add(edge)
       map(edge.rightRelation.get).add(edge)
     })
@@ -42,8 +41,29 @@ class ComparisonHyperGraph( val joinTree:JoinTree,edges:Set[ComparisonHyperGraph
       comparisonSet.count(comparison=>comparison.isLongComparison)<=1
     }
   }
-  def reduce(relation: Relation):Unit={
+  def reduceRelation(relation: Relation):ReduceInformation={
     assert(isReducible(relation))
-
+    val reducedComparisonInformationSet=relationComparisonsMap(relation).map(x=>x.reduceIncidentRelation(relation)).toSet
+    relationComparisonsMap(relation).foreach(comparison=>{
+      if(comparison.isDone) {
+        relationComparisonsMap(relation).remove(comparison)
+        this.edgeSet=edgeSet-comparison
+      }
+      else {
+        if(comparison.reducedLeftRelation.get){
+          relationComparisonsMap(comparison.leftRelation.get).add(comparison)
+        }
+        else relationComparisonsMap(comparison.rightRelation.get).add(comparison)
+      }
+    })
+    relationComparisonsMap.remove(relation)
+    val reducedJoinTreeEdge=joinTree.removeLeaf(relation)
+    if(reducedJoinTreeEdge.nonEmpty)
+      this.nodeSet=nodeSet-reducedJoinTreeEdge.get
+    ReduceInformation(relation = relation, reduceComparisonInformation = reducedComparisonInformationSet, reducedJoinTreeEdge = reducedJoinTreeEdge)
   }
 }
+
+case class ReduceInformation(relation: Relation,
+                             reduceComparisonInformation: Set[ReduceComparisonInformation],
+                             reducedJoinTreeEdge:Option[JoinTreeEdge])

@@ -17,17 +17,22 @@ class JoinTree(var nodeSet: Set[Relation], var edgeSet: Set[JoinTreeEdge]) {
   def isLeaf(input:Relation):Boolean={
     if(!nodeSet.contains(input)) false
     else{
-      if(edgeSet.count(edge=>edge.isRelatedToRelation(input))>1) false
-      else true
-    }
-  }
-  def removeLeaf(leaf:Relation):Unit={
-    if(isLeaf(leaf)){
-      this.nodeSet=this.nodeSet-leaf
-      for(edge<-edgeSet if edge.isRelatedToRelation(leaf)){
-        this.edgeSet=this.edgeSet-edge
+      if(nodeSet.size==1) true
+      else {
+        if (edgeSet.count(edge => edge.isRelatedToRelation(input)) > 1) false
+        else true
       }
     }
+  }
+  def removeLeaf(leaf:Relation):Option[JoinTreeEdge]={
+    assert(isLeaf(leaf))
+    this.nodeSet = nodeSet - leaf
+    if(nodeSet.size>1) {
+      val relatedJoinTreeEdge = this.edgeSet.filter(edge => edge.isRelatedToRelation(leaf)).head
+      this.edgeSet = edgeSet - relatedJoinTreeEdge
+      Some(relatedJoinTreeEdge)
+    }
+    else None
   }
 //  override def clone(): JoinTree = super.clone()
   override def equals(obj: Any): Boolean = {

@@ -6,6 +6,6 @@
         <parameter value="-target:jvm-1.5" />
       </parameters>
     </profile>
-    <profile name="Maven 2" modules="parser,planner" />
+    <profile name="Maven 2" modules="experiment,parser,planner" />
   </component>
 </project>

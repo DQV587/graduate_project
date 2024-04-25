@@ -13,26 +13,40 @@ class ComparisonHyperGraphEdge(val comparison: Comparison,edges:Set[JoinTreeEdge
   var rightRelation:Option[Relation]=right
   def isLongComparison:Boolean=this.edges.size>1
   def isShortComparison:Boolean=this.edges.size==1
-
+  var isDone=false
+  var reducedLeftRelation:Option[Boolean]=None
   //the relation to reduced is a leaf of the join tree, so there is only one edge whose son is exactly the relation.
   override def toString: String = {
     val builder=new mutable.StringBuilder()
     builder.append("left relation: ").append(leftRelation.get).append("\r\n")
     builder.append("right relation: ").append(rightRelation.get).append("\r\n")
     builder.append(comparison.toString).append("\r\n")
-    builder.append(nodeSet.toString())
+    builder.append(nodeSet.toString()).append("\r\n")
     builder.toString()
   }
-  def reduceIncidentRelation(isLeft:Boolean):JoinTreeEdge={
+  def reduceIncidentRelation(relation: Relation):ReduceComparisonInformation={
+    val isLeft:Boolean=this.leftRelation.get.equals(relation)
+    val isLong=this.isLongComparison
     val reducedRelation=if(isLeft) leftRelation.get else rightRelation.get
     val joinTreeEdgeToReduced=nodeSet.filter(node=>node.isRelatedToRelation(reducedRelation)).head
     val newIncidentRelation=joinTreeEdgeToReduced.getOtherRelation(reducedRelation)
+    this.nodeSet=nodeSet-joinTreeEdgeToReduced
     // one jointree edge can occur in many comparisons
     // for long comparisons the variable in the comparison is needed to preserve in the father relation
-    if(this.isLongComparison) newIncidentRelation.addNodes(if(isLeft) comparison.left.getVariables else comparison.right.getVariables)
-    if(isLeft) leftRelation=Some(newIncidentRelation)
-    else rightRelation=Some(newIncidentRelation)
-    //
-    joinTreeEdgeToReduced
+    if(isLong) newIncidentRelation.addNodes(if(isLeft) comparison.left.getVariables else comparison.right.getVariables)
+    //the short comparison need to be solved after reduce immediately,
+    //the method can be filter for single comparison related case or C1 comparison for multiple comparisons case
+    //or by range search method in which implicitly resolved
+    if(isShortComparison) isDone=true
+    if(isLeft) {
+      leftRelation=Some(newIncidentRelation)
+      this.reducedLeftRelation=Some(true)
+    }
+    else {
+      rightRelation=Some(newIncidentRelation)
+      this.reducedLeftRelation=Some(false)
+    }
+    ReduceComparisonInformation(isLong, isLeft, comparison)
   }
 }
+case class ReduceComparisonInformation(isLong:Boolean,isLeft:Boolean,comparison: Comparison)
