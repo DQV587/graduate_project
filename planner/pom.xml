@@ -25,6 +25,11 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
+            <groupId>edu.hit.dq.project</groupId>
+            <artifactId>basicLib</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
         </dependency>
@@ -69,11 +74,7 @@
             <artifactId>jsr305</artifactId>
             <version>3.0.2</version>
         </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>21.0</version>
-        </dependency>
+
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-math3</artifactId>
@@ -83,7 +84,6 @@
     </dependencies>
 
     <build>
-        <finalName>sparksql-plus-core</finalName>
         <plugins>
             <plugin>
                 <groupId>net.alchim31.maven</groupId>

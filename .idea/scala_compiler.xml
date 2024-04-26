@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ScalaCompilerConfiguration">
-    <profile name="Maven 1" modules="basicLib,bisicLib,cli,cliLib,coreLib,example,graduate_project,scala_test">
+    <profile name="Maven 1" modules="bisicLib,cli,cliLib,coreLib,example,graduate_project,scala_test">
       <parameters>
         <parameter value="-target:jvm-1.5" />
       </parameters>
     </profile>
-    <profile name="Maven 2" modules="experiment,parser,planner" />
+    <profile name="Maven 2" modules="basicLib,experiment,parser,planner" />
   </component>
 </project>
