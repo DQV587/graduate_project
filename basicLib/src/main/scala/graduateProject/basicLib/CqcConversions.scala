@@ -64,7 +64,9 @@ object CqcConversions {
       })
     }
 
-    def enumerateWithOneComparison[T,C](other:RDD[(K,Array[Array[Any]])],getValueFunc:(Array[Any])=>C,compareFunc:(C,C)=>Boolean,
+    def enumerateWithOneComparison[T,C](other:RDD[(K,Array[Array[Any]])],
+                                        getValueFunc1:(Array[Any])=>C, getValueFunc2:(Array[Any])=>C,
+                                        compareFunc:(C,C)=>Boolean,
                                         indices1:Array[Int],indices2:Array[Int],
                                         newKeySelector:(Array[Any],Array[Any])=>T = null):RDD[(T,Array[Any])]={
       rdd.cogroup(other).filter(x=>x._2._1.nonEmpty).mapPartitions(x=>x.flatMap(iter=>{
@@ -72,7 +74,7 @@ object CqcConversions {
         val lIter=iter._2._1.toIterator
         val rIter=iter._2._2.head.toIterator
         lIter.flatMap(l=>{
-          rIter.takeWhile(r=>compareFunc(getValueFunc(l),getValueFunc(r))).map(r=>{
+          rIter.takeWhile(r=>compareFunc(getValueFunc1(l),getValueFunc2(r))).map(r=>{
             val newTuple=extractFields(l,r,indices1,indices2)
             val newKey=if(newKeySelector==null) key
             else newKeySelector(l,r)
