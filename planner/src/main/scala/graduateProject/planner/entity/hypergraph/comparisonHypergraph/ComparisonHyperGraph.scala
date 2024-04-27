@@ -29,7 +29,47 @@ class ComparisonHyperGraph( val joinTree:JoinTree,edges:Set[ComparisonHyperGraph
     }).max
   }
   def isBergeAcyclic:Boolean={
-    true
+    // create a bipartite graph with the comparisons as one set and the joinTreeEdges as another set.
+    // one element from the joinTreeEdges set is connected with one element from the comparisons set
+    // if and only if the comparison contains the joinTreeEdge
+    val nodesInBipartiteGraph: Set[Either[ComparisonHyperGraphEdge, JoinTreeEdge]] = edges.map(cmp => Left(cmp)) ++
+      nodes.map(joinTreeEdge => Right(joinTreeEdge))
+    val nodesInBipartiteGraphToId: Map[Either[ComparisonHyperGraphEdge, JoinTreeEdge], Int] = nodesInBipartiteGraph.zipWithIndex.toMap
+    val bipartiteGraphEdges: mutable.HashMap[Int, mutable.HashSet[Int]] = mutable.HashMap.empty
+    edges.foreach(cmp => {
+      val cmpId = nodesInBipartiteGraphToId(Left(cmp))
+      val joinTreeEdges = cmp.getNodes
+      joinTreeEdges.foreach(joinTreeEdge => {
+        val joinTreeEdgeId = nodesInBipartiteGraphToId(Right(joinTreeEdge))
+        bipartiteGraphEdges.getOrElseUpdate(cmpId, mutable.HashSet.empty).add(joinTreeEdgeId)
+        bipartiteGraphEdges.getOrElseUpdate(joinTreeEdgeId, mutable.HashSet.empty).add(cmpId)
+      })
+    })
+
+    // check if circle exists
+    val visitedNodes: mutable.HashSet[Int] = mutable.HashSet.empty
+    val predecessors: Array[Int] = Array.fill(nodesInBipartiteGraph.size)(-1)
+
+    def noCircle(node: Int): Boolean = {
+      if (!visitedNodes.contains(node)) {
+        // next node can any connected node other than the predecessor
+        val nextNodes = bipartiteGraphEdges(node).toSet - predecessors(node)
+        if (nextNodes.intersect(visitedNodes).nonEmpty) {
+          // this node connects with a visited node which differs from its predecessor
+          false
+        } else {
+          visitedNodes.add(node)
+          nextNodes.forall(next => {
+            predecessors(next) = node
+            noCircle(next)
+          })
+        }
+      } else {
+        true
+      }
+    }
+
+    nodesInBipartiteGraphToId.values.forall(id => noCircle(id))
   }
   def getReducibleRelations():Set[Relation]={
     joinTree.getLeafs.filter(x=>isReducible(x))

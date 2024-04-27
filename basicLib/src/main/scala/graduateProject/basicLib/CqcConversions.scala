@@ -54,7 +54,7 @@ object CqcConversions {
       rdd.cogroup(mf).flatMap(y=>{
         val x=y._2
         val key=y._1
-        val lIter=x._1
+        val lIter=x._1.iterator
         val rIter=x._2
         val newTuple=for{
           l<-lIter
@@ -72,12 +72,15 @@ object CqcConversions {
       rdd.cogroup(other).filter(x=>x._2._1.nonEmpty).mapPartitions(x=>x.flatMap(iter=>{
         val key=iter._1
         val lIter=iter._2._1.toIterator
-        val rIter=iter._2._2.head.toIterator
+        val rIter=iter._2._2.head
         lIter.flatMap(l=>{
-          rIter.takeWhile(r=>compareFunc(getValueFunc1(l),getValueFunc2(r))).map(r=>{
+          rIter.takeWhile(r=>compareFunc(getValueFunc1(l),getValueFunc2(r)))
+            .map(r=>{
             val newTuple=extractFields(l,r,indices1,indices2)
-            val newKey=if(newKeySelector==null) key
-            else newKeySelector(l,r)
+            val newKey={
+              if(newKeySelector==null) key
+              else newKeySelector(l,r)
+            }
             (newKey.asInstanceOf[T],newTuple)
           })
         })
