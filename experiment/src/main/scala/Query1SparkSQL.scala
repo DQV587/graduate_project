@@ -12,12 +12,12 @@ object Query1SparkSQL {
 
         val schema0 = "src INTEGER, dst INTEGER"
         val df0 = spark.read.format("csv")
-            .option("delimiter", ",")
+            .option("delimiter", " ")
             .option("quote", "")
             .option("header", "false")
             .schema(schema0)
             .load(s"${args.head}/graph.dat").persist()
-        df0.count()
+        val cnt0=df0.count()
         df0.createOrReplaceTempView("Graph")
 
         val result = spark.sql(
@@ -33,6 +33,7 @@ object Query1SparkSQL {
         val ts1 = System.currentTimeMillis()
         val cnt = result.count()
         val ts2 = System.currentTimeMillis()
+        LOGGER.info("original data cnt: " + cnt0)
         LOGGER.info("Query1-SparkSQL cnt: " + cnt)
         LOGGER.info("Query1-SparkSQL time: " + (ts2 - ts1) / 1000f)
 

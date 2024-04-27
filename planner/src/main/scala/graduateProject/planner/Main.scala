@@ -1,14 +1,10 @@
 package graduateProject.planner
 
-import graduateProject.parser
 import graduateProject.parser.CatalogManager
 import graduateProject.parser.implLib.SQLParser
 import graduateProject.parser.plan.SqlPlanner
 import graduateProject.planner.algorithm.{GYO, JoinTreeToComparisonHyperGraph, RelNodeToQuery}
 import graduateProject.planner.entity.hypergraph.relationHypergraph.RelationHyperGraph
-import graduateProject.planner.entity.joinTree.JoinTree
-import org.apache.calcite.rel.RelNode
-import org.apache.calcite.sql.{SqlNode, SqlNodeList}
 
 import scala.collection.mutable
 object Main {
