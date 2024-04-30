@@ -10,7 +10,7 @@ object Query1SparkCQC {
 		conf.setAppName("Query1SparkSQLPlus")
 		val spark = SparkSession.builder.config(conf).getOrCreate()
 
-		val v1 = spark.sparkContext.textFile(s"${args.head}/graph.dat").map(row => {
+		val v1 = spark.sparkContext.textFile(args.head).map(row => {
 			val f = row.split(" ")
 			Array[Any](f(0).toInt, f(1).toInt)
 		}).persist()

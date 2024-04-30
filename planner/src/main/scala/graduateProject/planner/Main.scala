@@ -34,15 +34,13 @@ object Main {
     println(joinTreeSet)
     val comparisonHyperGraph=JoinTreeToComparisonHyperGraph(joinTreeSet.head,query.comparisons.toSet)
     println(comparisonHyperGraph)
-    println(comparisonHyperGraph.degree)
 //    println(comparisonHyperGraph.relationComparisonsMap)
-    val relationsCanBeReduced=comparisonHyperGraph.getReducibleRelations()
-    println(comparisonHyperGraph.getReducibleRelations())
-    println(comparisonHyperGraph.reduceRelation(relationsCanBeReduced.head))
+    val relationsCanBeReduced=comparisonHyperGraph.getReducibleRelations
+    println(relationsCanBeReduced)
+    val newGraph=comparisonHyperGraph.copy
+    println(newGraph.reduceRelation(relationsCanBeReduced.head))
     println(comparisonHyperGraph)
-    val mutableMap=mutable.Set[Int]()
-    println(mutableMap.add(1))
-    println(mutableMap.add(1))
+    println(newGraph)
   }
 
 }

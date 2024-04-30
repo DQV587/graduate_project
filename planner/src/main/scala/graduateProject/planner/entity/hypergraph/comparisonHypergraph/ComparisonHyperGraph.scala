@@ -20,6 +20,10 @@ class ComparisonHyperGraph( val joinTree:JoinTree,edges:Set[ComparisonHyperGraph
     })
     map
   }
+
+  override def nonEmpty: Boolean = nodeSet.nonEmpty
+
+  override def isEmpty: Boolean = nodeSet.isEmpty
   override def toString: String = "nodes:\r\n"+nodeSet.toString()+"\r\ncomparisons:\r\n"+edgeSet.toString()
   def degree:Int={
     nodeSet.map(node=>{
@@ -71,7 +75,7 @@ class ComparisonHyperGraph( val joinTree:JoinTree,edges:Set[ComparisonHyperGraph
 
     nodesInBipartiteGraphToId.values.forall(id => noCircle(id))
   }
-  def getReducibleRelations():Set[Relation]={
+  def getReducibleRelations:Set[Relation]={
     joinTree.getLeafs.filter(x=>isReducible(x))
   }
   def isReducible(relation:Relation):Boolean={
@@ -80,6 +84,13 @@ class ComparisonHyperGraph( val joinTree:JoinTree,edges:Set[ComparisonHyperGraph
       val comparisonSet=relationComparisonsMap(relation)
       comparisonSet.count(comparison=>comparison.isLongComparison)<=1
     }
+  }
+  def copy:ComparisonHyperGraph={
+    val newNodesSet=this.nodeSet
+    val edgeList=mutable.ArrayBuffer[ComparisonHyperGraphEdge]()
+    this.edgeSet.foreach(edge=>{edgeList.append(edge.copy)})
+    val newEdgesSet=edgeList.toSet
+    new ComparisonHyperGraph(this.joinTree.copy,newEdgesSet,newNodesSet)
   }
   def reduceRelation(relation: Relation):ReduceInformation={
     assert(isReducible(relation))

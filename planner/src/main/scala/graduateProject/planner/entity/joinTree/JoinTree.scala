@@ -34,6 +34,9 @@ class JoinTree(var nodeSet: Set[Relation], var edgeSet: Set[JoinTreeEdge]) {
     }
     else None
   }
+  def copy:JoinTree={
+    new JoinTree(this.nodeSet,this.edgeSet)
+  }
 //  override def clone(): JoinTree = super.clone()
   override def equals(obj: Any): Boolean = {
     if(!obj.isInstanceOf[JoinTree]) false
@@ -74,7 +77,7 @@ object JoinTree{
 
 case class JoinTreeEdge(relation1:Relation, relation2:Relation, sharedVariable:Set[Variable]){
   override def toString: String = {
-    "(Relation1: "+relation1.getRelationId()+" Relation2: "+relation2.getRelationId()+")"
+    "(Relation1: "+relation1.getRelationId()+" Relation2: "+relation2.getRelationId()+" SharedVariable:"+sharedVariable.toString()+")"
   }
   def isRelatedToRelation(relation: Relation):Boolean=relation1.equals(relation)||relation2.equals(relation)
   def getOtherRelation(relation: Relation):Relation={

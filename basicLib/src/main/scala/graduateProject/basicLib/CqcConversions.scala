@@ -92,13 +92,14 @@ object CqcConversions {
       rdd.cogroup(mf).flatMap(y=>{
         val key=y._1
         val lIter=y._2._1.toIterator
-        val rArray=y._2._2.head
+        val rArrayIter=y._2._2
         //隐形一次半连接
         val newTuple=for{
           l<-lIter
+          r<-rArrayIter
           //实际上是一次短比较
-          if(compareFunc(rArray.head._1,getValueFunc(l)))
-        } yield (key,l:+binarySearchInDictionary(rArray,getValueFunc(l),compareFunc))
+          if(compareFunc(r.head._1,getValueFunc(l)))
+        } yield (key,l:+binarySearchInDictionary(r,getValueFunc(l),compareFunc))
         newTuple
       })
     }
@@ -111,7 +112,8 @@ object CqcConversions {
         val lIter=iter._2._1.toIterator
         val rArray=iter._2._2.head
         lIter.flatMap(l=>{
-          val result=rArray.iterator(getValueFun1(l),getValueFun2(l)).map(r=>{
+          val result=rArray.iterator(getValueFun1(l),getValueFun2(l)).map(
+            r=>{
             val newTuple=extractFields(l,r,indices1,indices2)
             val newKey=if(newKeySelector==null) key
             else newKeySelector(l,r)
