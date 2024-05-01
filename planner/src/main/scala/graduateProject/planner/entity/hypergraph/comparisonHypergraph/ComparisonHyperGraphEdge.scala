@@ -11,8 +11,8 @@ class ComparisonHyperGraphEdge(val comparison: Comparison,edges:Set[JoinTreeEdge
   var nodeSet: Set[JoinTreeEdge] =edges
   var leftRelation:Option[Relation]=left
   var rightRelation:Option[Relation]=right
-  def isLongComparison:Boolean=this.edges.size>1
-  def isShortComparison:Boolean=this.edges.size==1
+  def isLongComparison:Boolean=this.nodeSet.size>1
+  def isShortComparison:Boolean=this.nodeSet.size==1
   var isDone=false
   var reducedLeftRelation:Option[Boolean]=None
   //the relation to reduced is a leaf of the join tree, so there is only one edge whose son is exactly the relation.
@@ -20,6 +20,7 @@ class ComparisonHyperGraphEdge(val comparison: Comparison,edges:Set[JoinTreeEdge
     val builder=new mutable.StringBuilder()
     builder.append("left relation: ").append(leftRelation.get).append("\r\n")
     builder.append("right relation: ").append(rightRelation.get).append("\r\n")
+    builder.append("isLongComparison:").append(isLongComparison).append("\t")
     builder.append(comparison.toString).append("\r\n")
     builder.append(nodeSet.toString()).append("\r\n")
     builder.toString()
@@ -40,7 +41,7 @@ class ComparisonHyperGraphEdge(val comparison: Comparison,edges:Set[JoinTreeEdge
     //the short comparison need to be solved after reduce immediately,
     //the method can be filter for single comparison related case or C1 comparison for multiple comparisons case
     //or by range search method in which implicitly resolved
-    if(isShortComparison) isDone=true
+    if(!isLong) isDone=true
     if(isLeft) {
       leftRelation=Some(newIncidentRelation)
       this.reducedLeftRelation=Some(true)

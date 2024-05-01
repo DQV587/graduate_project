@@ -3,7 +3,8 @@ package graduateProject.planner
 import graduateProject.parser.CatalogManager
 import graduateProject.parser.implLib.SQLParser
 import graduateProject.parser.plan.SqlPlanner
-import graduateProject.planner.algorithm.{GYO, JoinTreeToComparisonHyperGraph, RelNodeToQuery}
+import graduateProject.planner.algorithm.innerRepresentation.{GYO, JoinTreeToComparisonHyperGraph, RelNodeToQuery}
+import graduateProject.planner.algorithm.planGenerator.GeneratePhysicalPlan
 import graduateProject.planner.entity.hypergraph.relationHypergraph.RelationHyperGraph
 
 import scala.collection.mutable
@@ -29,18 +30,16 @@ object Main {
     val root = crownPlanner.toLogicalPlan(tmp)
     val query=RelNodeToQuery.convert(root)
     val hyperGraph=RelationHyperGraph.constructFromQuery(query)
-    println(hyperGraph.isAcyclic)
+//    println(hyperGraph.isAcyclic)
     val joinTreeSet=GYO(hyperGraph)
     println(joinTreeSet)
     val comparisonHyperGraph=JoinTreeToComparisonHyperGraph(joinTreeSet.head,query.comparisons.toSet)
-    println(comparisonHyperGraph)
+//    println(comparisonHyperGraph)
 //    println(comparisonHyperGraph.relationComparisonsMap)
     val relationsCanBeReduced=comparisonHyperGraph.getReducibleRelations
-    println(relationsCanBeReduced)
+//    println(relationsCanBeReduced)
     val newGraph=comparisonHyperGraph.copy
-    println(newGraph.reduceRelation(relationsCanBeReduced.head))
-    println(comparisonHyperGraph)
-    println(newGraph)
+    GeneratePhysicalPlan(catalogManager,newGraph)
   }
 
 }

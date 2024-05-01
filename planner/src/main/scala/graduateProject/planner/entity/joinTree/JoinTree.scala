@@ -27,7 +27,7 @@ class JoinTree(var nodeSet: Set[Relation], var edgeSet: Set[JoinTreeEdge]) {
   def removeLeaf(leaf:Relation):Option[JoinTreeEdge]={
     assert(isLeaf(leaf))
     this.nodeSet = nodeSet - leaf
-    if(nodeSet.size>1) {
+    if(nodeSet.nonEmpty) {
       val relatedJoinTreeEdge = this.edgeSet.filter(edge => edge.isRelatedToRelation(leaf)).head
       this.edgeSet = edgeSet - relatedJoinTreeEdge
       Some(relatedJoinTreeEdge)
@@ -64,14 +64,12 @@ class JoinTree(var nodeSet: Set[Relation], var edgeSet: Set[JoinTreeEdge]) {
   }
 }
 object JoinTree{
-
   def emptyJoinTree:JoinTree={
     new JoinTree(Set[Relation](),Set[JoinTreeEdge]())
   }
   def newJoinTree(oldTree:JoinTree,newEdge:JoinTreeEdge):JoinTree={
       new JoinTree(oldTree.nodeSet++Set(newEdge.relation2,newEdge.relation1),oldTree.edgeSet+newEdge)
   }
-
 }
 
 

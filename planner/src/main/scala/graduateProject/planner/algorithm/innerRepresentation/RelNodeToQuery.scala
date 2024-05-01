@@ -1,18 +1,16 @@
-package graduateProject.planner.algorithm
+package graduateProject.planner.algorithm.innerRepresentation
 
 import graduateProject.planner.entity.data_type._
-import graduateProject.planner.entity.hypergraph.HyperGraph
-import graduateProject.planner.entity.hypergraph.relationHypergraph.{AggregatedRelation, Relation, RelationHyperGraph, TableScanRelation, Variable}
-import graduateProject.planner.util.DisjointSet
 import graduateProject.planner.entity.expression._
+import graduateProject.planner.entity.hypergraph.relationHypergraph.{Relation, Variable}
 import graduateProject.planner.entity.query.Query
+import graduateProject.planner.util.DisjointSet
 import org.apache.calcite.rel.RelNode
-import org.apache.calcite.rel.logical.{LogicalAggregate, LogicalFilter, LogicalJoin, LogicalProject, LogicalTableScan}
+import org.apache.calcite.rel.logical._
 import org.apache.calcite.rex.{RexCall, RexInputRef, RexLiteral, RexNode}
-import org.apache.calcite.util.NlsString
 
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.collection.JavaConversions._
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 
 object RelNodeToQuery {
 

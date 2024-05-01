@@ -1,6 +1,5 @@
-package graduateProject.planner.algorithm
+package graduateProject.planner.algorithm.innerRepresentation
 
-import graduateProject.planner.entity.hypergraph.HyperGraph
 import graduateProject.planner.entity.hypergraph.relationHypergraph.RelationHyperGraph
 import graduateProject.planner.entity.joinTree.JoinTree
 
@@ -10,7 +9,6 @@ object GYO {
   def apply(hyperGraph: RelationHyperGraph):Set[JoinTree]={
     val initState=GyoState(hyperGraph,JoinTree.emptyJoinTree)
     var result=Set[JoinTree]()
-    mutable.Stack
     var stateStack=List[GyoState](initState)
     while(stateStack.nonEmpty){
       var tmpStack=List[GyoState]()

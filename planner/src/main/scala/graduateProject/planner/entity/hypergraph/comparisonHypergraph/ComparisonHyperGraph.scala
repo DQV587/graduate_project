@@ -98,6 +98,12 @@ class ComparisonHyperGraph( val joinTree:JoinTree,edges:Set[ComparisonHyperGraph
     relationComparisonsMap(relation).foreach(comparison=>{
       if(comparison.isDone) {
         relationComparisonsMap(relation).remove(comparison)
+        relationComparisonsMap({
+          if(comparison.leftRelation.get.equals(relation))
+            comparison.rightRelation.get
+          else
+            comparison.leftRelation.get
+        }).remove(comparison)
         this.edgeSet=edgeSet-comparison
       }
       else {
