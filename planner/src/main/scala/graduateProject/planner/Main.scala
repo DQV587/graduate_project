@@ -22,24 +22,31 @@ object Main {
       "AND c3.src = g2.src AND c4.dst = g3.dst " +
       "AND c1.cnt < c2.cnt AND c3.cnt < c4.cnt"
     val tmp = SQLParser.parseDml(dml)
-    val ddl = "CREATE TABLE Graph (\n" + "    src INT,\n" + "    dst INT\n" + ") WITH (\n" + "    'path' = 'examples/data/graph.dat'\n" + ")"
+    val ddl = "CREATE TABLE Graph (\n" +
+      "    src INT,\n" + "    dst INT\n" + ") WITH (\n" +
+      "    'path' = 'examples/data/graph.dat'\n" +
+      ", "+
+      "    'delimiter' = ' '\n" +
+      ")"
     val nodeList = SQLParser.parseDdl(ddl)
     val catalogManager = new CatalogManager
     catalogManager.register(nodeList)
     val crownPlanner = new SqlPlanner(catalogManager)
     val root = crownPlanner.toLogicalPlan(tmp)
     val query=RelNodeToQuery.convert(root)
+
     val hyperGraph=RelationHyperGraph.constructFromQuery(query)
 //    println(hyperGraph.isAcyclic)
     val joinTreeSet=GYO(hyperGraph)
-    println(joinTreeSet)
+//    println(joinTreeSet)
     val comparisonHyperGraph=JoinTreeToComparisonHyperGraph(joinTreeSet.head,query.comparisons.toSet)
 //    println(comparisonHyperGraph)
 //    println(comparisonHyperGraph.relationComparisonsMap)
     val relationsCanBeReduced=comparisonHyperGraph.getReducibleRelations
 //    println(relationsCanBeReduced)
     val newGraph=comparisonHyperGraph.copy
-    GeneratePhysicalPlan(catalogManager,newGraph)
+    GeneratePhysicalPlan(catalogManager,query,newGraph)
+
   }
 
 }

@@ -21,6 +21,11 @@ public class SqlTableColumn extends SqlCall {
         this.type = type;
     }
 
+    @Override
+    public String toString() {
+        return "Column name: "+ name+" Type: "+type;
+    }
+
     public SqlIdentifier getName() {
         return name;
     }

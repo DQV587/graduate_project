@@ -172,7 +172,7 @@ object CqcConversions {
     }
   }
 
-  implicit class KeyGroupByArray[K:ClassTag,C1,C2](rdd:RDD[(K,OneDimSortedArray[C1,C2])]) extends Serializable{
+  implicit class KeyOneDimArray[K:ClassTag,C1,C2](rdd:RDD[(K,OneDimSortedArray[C1,C2])]) extends Serializable{
 
     def getMf:RDD[(K,Array[(C1,C2)])]={
       rdd.mapValues(array=>array.getMin)
