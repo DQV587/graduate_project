@@ -34,4 +34,22 @@ trait AfterAction extends BasicAction
 trait CqcAction extends PhysicalAction
 
 trait ReduceAction extends CqcAction
+
+trait GroupByKeyAction extends ReduceAction
+
+case class SourceTableGroupByKeyAction(oldName:String,
+                                       newName:String,
+                                       key:(Int,DataType)) extends GroupByKeyAction
+case class AggregatedTableGroupByKeyAction(oldName:String,
+                                           newName:String,
+                                           keyIndex:Int,
+                                           valueIndex:Int,
+                                           func:String) extends GroupByKeyAction
+
+case class ReKeyAction(oldName:String,
+                       newName:String,
+                       key:(Int,DataType)) extends GroupByKeyAction
+
+case class AppendMfAction(appendTo:String,appendFrom:String
+                         ,newName:String) extends ReduceAction
 trait EnumerateAction extends CqcAction

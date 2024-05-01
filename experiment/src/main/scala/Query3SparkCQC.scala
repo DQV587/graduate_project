@@ -25,6 +25,7 @@ object Query3SparkCQC {
 		val v4 = v2.map(x => (x(0).asInstanceOf[Int], x(1)))
 		val v5 = v1.keyBy(x => x(0).asInstanceOf[Int])
 		val v6 = v5.appendMf(v4)
+
 		val v7 = v6.reKeyBy(x => x(1).asInstanceOf[Int])
 		val v8 = v7.groupBy()
 		val v9 = v8.sortWith[Long]((array:Array[Any])=>array(2).asInstanceOf[Long], (x: Long, y: Long) => longLessThan(x, y)).persist()

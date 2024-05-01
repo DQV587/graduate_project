@@ -31,12 +31,12 @@ object Relation {
     ID
   }
   def newTableScanRelation(tableName: String, variables: Set[Variable]):TableScanRelation=
-    new TableScanRelation(tableName,variables)
+    TableScanRelation(tableName,variables)
 
   def newAggregateRelation(tableName: String,variables: Set[Variable],group: List[Int],func: String):AggregatedRelation=
-    new AggregatedRelation(tableName, variables, group, func)
+    AggregatedRelation(tableName, variables, group, func)
 }
-class AggregatedRelation(val tableName: String, variables: Set[Variable],
+case class AggregatedRelation(val tableName: String, variables: Set[Variable],
                          val group: List[Int], val func: String) extends Relation {
   override def getTableName(): String = tableName
 
@@ -48,7 +48,7 @@ class AggregatedRelation(val tableName: String, variables: Set[Variable],
 
   var nodeSet: Set[Variable] = variables
 }
-class TableScanRelation(val tableName: String, variables: Set[Variable]) extends Relation {
+case class TableScanRelation(val tableName: String, variables: Set[Variable]) extends Relation {
 
   def getTableName(): String = tableName
 

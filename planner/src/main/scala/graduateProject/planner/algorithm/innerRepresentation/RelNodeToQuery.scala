@@ -4,7 +4,7 @@ import graduateProject.planner.entity.data_type._
 import graduateProject.planner.entity.expression._
 import graduateProject.planner.entity.hypergraph.relationHypergraph.{Relation, Variable}
 import graduateProject.planner.entity.query.Query
-import graduateProject.planner.util.DisjointSet
+import graduateProject.planner.entity.util.DisjointSet
 import org.apache.calcite.rel.RelNode
 import org.apache.calcite.rel.logical._
 import org.apache.calcite.rex.{RexCall, RexInputRef, RexLiteral, RexNode}

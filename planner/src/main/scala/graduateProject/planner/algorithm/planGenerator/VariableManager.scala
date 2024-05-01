@@ -1,7 +1,7 @@
 package graduateProject.planner.algorithm.planGenerator
 
 import graduateProject.planner.entity.data_type.DataType
-import graduateProject.planner.entity.physicalPlanVariable.{ArrayTypeVariable, VariableInformation}
+import graduateProject.planner.entity.physicalPlanVariable.{ArrayTypeVariable, KeyArrayTypeVariable, KeyValueTypeVariable, VariableInformation}
 
 import scala.collection.mutable
 
@@ -11,7 +11,12 @@ class VariableManager {
   def register(variableName:String,columns:Array[(String,DataType)]):Unit={
     variableInformationMap(variableName)=ArrayTypeVariable(variableName,columns)
   }
-
+  def register(variableName:String,key:(String,DataType),value:(String,DataType)):Unit={
+    variableInformationMap(variableName)=KeyValueTypeVariable(variableName,key,value)
+  }
+  def register(variableName:String,key:Int,columns:Array[(String,DataType)]):Unit={
+    variableInformationMap(variableName)=KeyArrayTypeVariable(variableName,key,columns)
+  }
   override def toString: String = {
     variableInformationMap.mkString("VariableInformation:\r\n","\r\n"," ")
   }

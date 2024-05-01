@@ -1,4 +1,4 @@
-package graduateProject.planner.util
+package graduateProject.planner.entity.util
 
 import scala.collection.mutable
 

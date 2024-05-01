@@ -38,7 +38,7 @@ object Main {
     val hyperGraph=RelationHyperGraph.constructFromQuery(query)
 //    println(hyperGraph.isAcyclic)
     val joinTreeSet=GYO(hyperGraph)
-//    println(joinTreeSet)
+//    println(joinTreeSet.head)
     val comparisonHyperGraph=JoinTreeToComparisonHyperGraph(joinTreeSet.head,query.comparisons.toSet)
 //    println(comparisonHyperGraph)
 //    println(comparisonHyperGraph.relationComparisonsMap)

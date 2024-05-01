@@ -58,6 +58,8 @@ class JoinTree(var nodeSet: Set[Relation], var edgeSet: Set[JoinTreeEdge]) {
   }
   override def toString: String = {
     val builder=new mutable.StringBuilder()
+    nodeSet.foreach(node=>
+    builder.append(node.toString).append("\r\n"))
     edgeSet.foreach(edge=>
       builder.append(edge.toString).append(":").append(edge.sharedVariable).append("\r\n"))
     builder.toString()
