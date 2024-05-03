@@ -55,7 +55,10 @@ case class NoIncidentComparisonsReduce(oldName:String,
 trait AppendMfAction extends ArrayByKeyAction
 case class AppendKeyValueAction(appendTo:String,appendFrom:String
                                 ,newName:String) extends AppendMfAction
-
+case class AppendKey2TupleAction(appendTo:String,appendFrom:String,newName:String,
+                                 compareValueIndex:Int,
+                                 comparisonIndex:Int,
+                                 isLeft:Boolean) extends AppendMfAction
 
 case class SelfFilterAction(oldName:String,
                              newName:String,
@@ -64,6 +67,8 @@ case class SelfFilterAction(oldName:String,
                              rightIndex:Int) extends ArrayByKeyAction
 
 trait GroupByKeyAction extends ReduceAction
+case class KeyArrayGroupByKeyAction(oldName:String,
+                                    newName:String) extends GroupByKeyAction
 
 case class SortGroupByKeyAction(oldName:String,
                                 newName:String,
@@ -75,9 +80,23 @@ case class GetMfFromSortedGroupByKeyAction(oldName:String,
                                            newName:String) extends GroupByKeyAction
 
 
-case class KeyArrayGroupByKeyAction(oldName:String,
-                                    newName:String) extends GroupByKeyAction
 
+
+trait OneDimArrayByKeyAction extends ReduceAction
+
+case class SortByOneDimArrayAction(oldName:String,
+                              newName:String,
+                              valueIndex1: Int,
+                              comparisonIndex1: Int,
+                              isLeft1: Boolean,
+                              valueIndex2: Int,
+                              comparisonIndex2: Int,
+                              isLeft2: Boolean
+                             ) extends OneDimArrayByKeyAction
+
+case class GetMfFromOneDimArrayAction(oldName:String,
+                                      newName:String
+                                     ) extends OneDimArrayByKeyAction
 
 trait EnumerateAction extends CqcAction
 

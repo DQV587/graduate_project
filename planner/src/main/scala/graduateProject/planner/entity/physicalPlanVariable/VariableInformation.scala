@@ -26,10 +26,16 @@ case class KeyGroupByTypeVariable(name:String,keyIndex:Int,columns:Array[(String
   }
 }
 
-case class KeyOneDimArrayTypeVariable(name:String) extends VariableInformation
+case class KeyOneDimArrayTypeVariable(name:String,keyIndex:Int,columns:Array[(String,DataType)],
+                                      valueIndex1:Int,comparisonIndex1:Int,isLeft1:Boolean,
+                                      valueIndex2:Int,comparisonIndex2:Int,isLeft2:Boolean) extends VariableInformation
+
 
 case class KeyValueTypeVariable(name:String,key:(String,DataType),value:(String,DataType)) extends VariableInformation{
   override def toString: String = {
     name+" : "+"(key: "+key+ " value: "+value+")"
   }
 }
+
+case class KeyTwoValueTypeVariable(name:String,key:(String,DataType),
+                                   value1:(String,DataType),value2:(String,DataType)) extends VariableInformation

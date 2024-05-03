@@ -4,7 +4,7 @@ import graduateProject.parser.CatalogManager
 import graduateProject.parser.implLib.ddl.SqlTable
 import graduateProject.planner.entity.data_type.{DataType, LongDataType}
 import graduateProject.planner.entity.expression.Comparison
-import graduateProject.planner.entity.hypergraph.comparisonHypergraph.{ComparisonHyperGraph, ReduceInformation}
+import graduateProject.planner.entity.hypergraph.comparisonHypergraph.{ComparisonHyperGraph, ReduceComparisonInformation, ReduceInformation}
 import graduateProject.planner.entity.hypergraph.relationHypergraph.{AggregatedRelation, Relation, TableScanRelation, Variable}
 import graduateProject.planner.entity.physicalPlanVariable._
 import graduateProject.planner.entity.query.Query
@@ -108,6 +108,23 @@ object GeneratePhysicalPlan {
       variableInformation.asInstanceOf[KeyArrayTypeVariable].columns,sorted = false)
     relationMapToVariable(relation)=newName
   }
+  def filterInKeyArray(relation: Relation,comparisonInformation: ReduceComparisonInformation,
+                       relationMapToVariable: mutable.Map[Relation, String],
+                       variableManager: VariableManager,
+                       comparisonMapToInt: mutable.Map[Comparison, Int],
+                       cqcActions: mutable.ListBuffer[CqcAction]):Unit={
+    val comparison = comparisonInformation.comparison
+    val afterFilterName = VariableManager.getNewVariableName
+    val otherRelationVariableName = relationMapToVariable(relation)
+    val otherRelationVariable = variableManager.get(otherRelationVariableName).asInstanceOf[KeyArrayTypeVariable]
+    val columns = otherRelationVariable.columns
+    val comparisonIndex = comparisonMapToInt(comparison)
+    val leftIndex = getVariableIndexFromArray(comparison.left.getVariables.head, columns)
+    val rightIndex = getVariableIndexFromArray(comparison.right.getVariables.head, columns)
+    cqcActions.append(SelfFilterAction(otherRelationVariableName, afterFilterName, comparisonIndex, leftIndex, rightIndex))
+    variableManager.register(afterFilterName, otherRelationVariable.keyIndex, otherRelationVariable.columns)
+    relationMapToVariable(relation) = afterFilterName
+  }
   def getBeforeActions(catalog: CatalogManager, query: Query,
     relationMapToVariable:mutable.Map[Relation, String],
     comparisonMapToInt:mutable.Map[Comparison, Int],
@@ -208,12 +225,10 @@ object GeneratePhysicalPlan {
       }
         case tableScanRelation: TableScanRelation => {
           val thisRelation=tableScanRelation
-          val thisRelationVariableName=relationMapToVariable(thisRelation)
-          val thisRelationVariableInformation=variableManager.get(thisRelationVariableName)
           //the last relation, reduce phase completed, begin enumeration phase
           if(reduceInformation.reducedJoinTreeEdge.isEmpty){
-          }
 
+          }
           else{
             val reducedJoinTreeEdge=reduceInformation.reducedJoinTreeEdge.get
             val otherRelation=reducedJoinTreeEdge.getOtherRelation(thisRelation)
@@ -273,21 +288,69 @@ object GeneratePhysicalPlan {
 
                 // check whether short comparison, if yes, then perform filter action
                 if(!reduceInformation.reduceComparisonInformation.head.isLong){
-                  val comparison=reduceInformation.reduceComparisonInformation.head.comparison
-                  val afterFilterName=VariableManager.getNewVariableName
-                  val otherRelationVariableName=relationMapToVariable(otherRelation)
-                  val otherRelationVariable=variableManager.get(otherRelationVariableName).asInstanceOf[KeyArrayTypeVariable]
-                  val columns=otherRelationVariable.columns
-                  val comparisonIndex=comparisonMapToInt(comparison)
-                  val leftIndex=getVariableIndexFromArray(comparison.left.getVariables.head,columns)
-                  val rightIndex=getVariableIndexFromArray(comparison.right.getVariables.head,columns)
-                  cqcActions.append(SelfFilterAction(otherRelationVariableName,afterFilterName,comparisonIndex, leftIndex, rightIndex))
-                  variableManager.register(afterFilterName,otherRelationVariable.keyIndex,otherRelationVariable.columns)
-                  relationMapToVariable(otherRelation)=afterFilterName
+                  filterInKeyArray(otherRelation,reduceInformation.reduceComparisonInformation.head,
+                    relationMapToVariable,variableManager,comparisonMapToInt,cqcActions)
                 }
               }
               case 2=>{
+                // convert the key-group rdd to key-oneDimArray
+                val comparisonInformationArray=reduceInformation.reduceComparisonInformation.toArray
+                val index={
+                  if(comparisonInformationArray.head.isLong) 1
+                  else 0
+                }
+                val indexComparisonInformation=comparisonInformationArray(index)
+                val valueComparisonInformation=comparisonInformationArray(1-index)
+                val oneDimStructureName=VariableManager.getNewVariableName
+                val oldName=relationMapToVariable(thisRelation)
+                val thisRelationVariable=variableManager.get(oldName).asInstanceOf[KeyGroupByTypeVariable]
+                val index1=getVariableIndexFromArray({
+                  if(indexComparisonInformation.isLeft)
+                    indexComparisonInformation.comparison.left.getVariables.head
+                  else
+                    indexComparisonInformation.comparison.right.getVariables.head},
+                  thisRelationVariable.columns)
+                val index2 = getVariableIndexFromArray({
+                  if (valueComparisonInformation.isLeft)
+                    valueComparisonInformation.comparison.left.getVariables.head
+                  else
+                    valueComparisonInformation.comparison.right.getVariables.head
+                },
+                  thisRelationVariable.columns)
+                cqcActions.append(SortByOneDimArrayAction(oldName,oneDimStructureName,
+                  index1,comparisonMapToInt(indexComparisonInformation.comparison),indexComparisonInformation.isLeft,
+                  index2,comparisonMapToInt(valueComparisonInformation.comparison),valueComparisonInformation.isLeft
+                ))
+                variableManager.register(oneDimStructureName,thisRelationVariable.keyIndex,thisRelationVariable.columns,
+                  index1, comparisonMapToInt(indexComparisonInformation.comparison), indexComparisonInformation.isLeft,
+                  index2, comparisonMapToInt(valueComparisonInformation.comparison), valueComparisonInformation.isLeft)
+                relationMapToVariable(thisRelation)=oldName
+                // get Mf column and append to the other relation
+                val mfName=VariableManager.getNewVariableName
+                val oneDimArrayVariable=variableManager.get(oneDimStructureName).asInstanceOf[KeyOneDimArrayTypeVariable]
+                cqcActions.append(GetMfFromOneDimArrayAction(oneDimStructureName,mfName))
+                val key=oneDimArrayVariable.columns(oneDimArrayVariable.keyIndex)
+                val dim1=oneDimArrayVariable.columns(oneDimArrayVariable.valueIndex1)
+                val dim2=oneDimArrayVariable.columns(oneDimArrayVariable.valueIndex2)
+                variableManager.register(mfName,key,dim1,dim2)
 
+                val otherRelationVariable=variableManager.get(relationMapToVariable(otherRelation)).asInstanceOf[KeyArrayTypeVariable]
+                val compareValueIndex=getVariableIndexFromArray({
+                  if(indexComparisonInformation.isLeft)
+                    indexComparisonInformation.comparison.right.getVariables.head
+                  else
+                    indexComparisonInformation.comparison.left.getVariables.head
+                },otherRelationVariable.columns)
+                val newName=VariableManager.getNewVariableName
+                cqcActions.append(AppendKey2TupleAction(otherRelationVariable.name,mfName,
+                  newName,compareValueIndex,comparisonMapToInt(indexComparisonInformation.comparison),
+                  indexComparisonInformation.isLeft))
+                variableManager.register(newName,otherRelationVariable.keyIndex,otherRelationVariable.columns:+dim2)
+                relationMapToVariable(otherRelation)=newName
+                if(!valueComparisonInformation.isLong){
+                  filterInKeyArray(otherRelation, valueComparisonInformation,
+                    relationMapToVariable, variableManager, comparisonMapToInt, cqcActions)
+                }
               }
               case _=>{
                 //TODO
@@ -313,10 +376,16 @@ object GeneratePhysicalPlan {
     val nodeNum = comparisonHyperGraph.nodeSet.size
     for (i <- 0 to nodeNum) {
       val reducibleRelationSet = comparisonHyperGraph.getReducibleRelations
-      val information = comparisonHyperGraph.reduceRelation(reducibleRelationSet.head)
+      val nextReduceRelation={
+        if(reducibleRelationSet.forall(relation=>relation.isInstanceOf[TableScanRelation]))
+          reducibleRelationSet.head
+        else
+          reducibleRelationSet.filter(relation=>relation.isInstanceOf[AggregatedRelation]).head
+      }
+      val information = comparisonHyperGraph.reduceRelation(nextReduceRelation)
       reduceInformationArray.append(information)
     }
-    val cqcAction=getCqcActions(reduceInformationArray.take(6).toList,relationMapToVariable,
+    val cqcAction=getCqcActions(reduceInformationArray.toList,relationMapToVariable,
       comparisonMapToInt, variableManager)
 
     println(cqcAction.mkString("\r\n"))

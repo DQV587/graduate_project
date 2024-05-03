@@ -165,8 +165,8 @@ object CqcConversions {
       rdd.mapValues(x=>getValueFunc(x.head))
     }
 
-    def groupByTreeLikeArray[C1,C2](getValueFun1: (Array[Any]) => C1, getValueFun2: (Array[Any]) => C2,
-                             compareFun1: (C1, C1) => Boolean, compareFun2: (C2, C2) => Boolean)
+    def sortByOneDimArray[C1,C2](getValueFun1: (Array[Any]) => C1, getValueFun2: (Array[Any]) => C2,
+                                 compareFun1: (C1, C1) => Boolean, compareFun2: (C2, C2) => Boolean)
     :RDD[(K,OneDimSortedArray[C1,C2])]={
       rdd.mapValues(x=>new OneDimSortedArray[C1,C2](x,getValueFun1,getValueFun2,compareFun1,compareFun2))
     }

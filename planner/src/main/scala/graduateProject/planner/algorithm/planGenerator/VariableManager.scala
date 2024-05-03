@@ -25,6 +25,17 @@ class VariableManager {
   def register(variableName: String, key: Int, columns: Array[(String, DataType)], sorted: Boolean,sortIndex:Int): Unit = {
     variableInformationMap(variableName) = KeyGroupByTypeVariable(variableName, key, columns, sorted, sortIndex)
   }
+  def register(variableName: String, key: Int, columns: Array[(String, DataType)],
+               valueIndex1: Int, comparisonIndex1: Int, isLeft1: Boolean,
+               valueIndex2: Int, comparisonIndex2: Int, isLeft2: Boolean):Unit={
+    variableInformationMap(variableName)=KeyOneDimArrayTypeVariable(variableName,key,columns,
+      valueIndex1, comparisonIndex1, isLeft1,
+      valueIndex2, comparisonIndex2, isLeft2)
+  }
+  def register(variableName: String, key: (String, DataType),
+               index: (String, DataType), value: (String, DataType)):Unit={
+    variableInformationMap(variableName)=KeyTwoValueTypeVariable(variableName,key,index,value)
+  }
   override def toString: String = {
     variableInformationMap.mkString("VariableInformation:\r\n","\r\n"," ")
   }

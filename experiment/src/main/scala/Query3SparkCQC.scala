@@ -42,7 +42,7 @@ object Query3SparkCQC {
 		val v17 = v16.reKeyBy(x => x(0).asInstanceOf[Int])
 		val v18 = v17.groupBy()
 		// construct one dimension index
-		val v19 = v18.groupByTreeLikeArray[Long, Long]((array:Array[Any])=>array(3).asInstanceOf[Long], (array:Array[Any])=>array(2).asInstanceOf[Long], (x: Long, y: Long) => longLessThan(y, x), (x: Long, y: Long) => longLessThan(y, x))
+		val v19 = v18.sortByOneDimArray[Long, Long]((array:Array[Any])=>array(3).asInstanceOf[Long], (array:Array[Any])=>array(2).asInstanceOf[Long], (x: Long, y: Long) => longLessThan(y, x), (x: Long, y: Long) => longLessThan(y, x))
 		val v20 = v19.getMf
 		// g2+g1.mf+c3+g3.mf
 		// 01   2   3   4
