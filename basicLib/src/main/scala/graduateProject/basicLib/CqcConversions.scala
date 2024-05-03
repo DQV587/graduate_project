@@ -24,7 +24,7 @@ object CqcConversions {
       rdd.map(x=>(keyIndict(x._2),x._2))
     }
 
-    def semiJoin(other:RDD[(K,Array[Any])]):RDD[(K,Array[Any])]={
+    def semiJoin(other:RDD[(K,Array[Array[Any]])]):RDD[(K,Array[Any])]={
       rdd.cogroup(other).filter(x=>x._2._2.nonEmpty).flatMapValues(x=>x._1)
     }
 

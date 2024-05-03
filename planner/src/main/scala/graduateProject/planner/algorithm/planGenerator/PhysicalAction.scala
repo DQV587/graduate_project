@@ -35,21 +35,49 @@ trait CqcAction extends PhysicalAction
 
 trait ReduceAction extends CqcAction
 
-trait GroupByKeyAction extends ReduceAction
+trait ArrayByKeyAction extends ReduceAction
 
-case class SourceTableGroupByKeyAction(oldName:String,
+case class SourceTableArrayByKeyAction(oldName:String,
                                        newName:String,
-                                       key:(Int,DataType)) extends GroupByKeyAction
-case class AggregatedTableGroupByKeyAction(oldName:String,
+                                       key:(Int,DataType)) extends ArrayByKeyAction
+case class AggregatedTableArrayByKeyAction(oldName:String,
                                            newName:String,
                                            keyIndex:Int,
                                            valueIndex:Int,
-                                           func:String) extends GroupByKeyAction
+                                           func:String) extends ArrayByKeyAction
 
 case class ReKeyAction(oldName:String,
                        newName:String,
-                       key:(Int,DataType)) extends GroupByKeyAction
+                       key:(Int,DataType)) extends ArrayByKeyAction
 
-case class AppendMfAction(appendTo:String,appendFrom:String
-                         ,newName:String) extends ReduceAction
+case class NoIncidentComparisonsReduce(oldName:String,
+                                       newName:String) extends ArrayByKeyAction
+trait AppendMfAction extends ArrayByKeyAction
+case class AppendKeyValueAction(appendTo:String,appendFrom:String
+                                ,newName:String) extends AppendMfAction
+
+
+case class SelfFilterAction(oldName:String,
+                             newName:String,
+                             comparisonIndex:Int,
+                             leftIndex:Int,
+                             rightIndex:Int) extends ArrayByKeyAction
+
+trait GroupByKeyAction extends ReduceAction
+
+case class SortGroupByKeyAction(oldName:String,
+                                newName:String,
+                                valueIndex:Int,
+                                comparisonIndex:Int,
+                                isLeft:Boolean) extends GroupByKeyAction
+
+case class GetMfFromSortedGroupByKeyAction(oldName:String,
+                                           newName:String) extends GroupByKeyAction
+
+
+case class KeyArrayGroupByKeyAction(oldName:String,
+                                    newName:String) extends GroupByKeyAction
+
+
 trait EnumerateAction extends CqcAction
+

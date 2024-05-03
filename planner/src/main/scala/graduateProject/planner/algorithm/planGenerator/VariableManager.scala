@@ -1,12 +1,12 @@
 package graduateProject.planner.algorithm.planGenerator
 
 import graduateProject.planner.entity.data_type.DataType
-import graduateProject.planner.entity.physicalPlanVariable.{ArrayTypeVariable, KeyArrayTypeVariable, KeyValueTypeVariable, VariableInformation}
+import graduateProject.planner.entity.physicalPlanVariable._
 
 import scala.collection.mutable
 
 class VariableManager {
-  val variableInformationMap=mutable.Map[String,VariableInformation]()
+  private val variableInformationMap=mutable.Map[String,VariableInformation]()
   def get(variableName:String):VariableInformation=variableInformationMap(variableName)
   def register(variableName:String,columns:Array[(String,DataType)]):Unit={
     variableInformationMap(variableName)=ArrayTypeVariable(variableName,columns)
@@ -17,6 +17,14 @@ class VariableManager {
   def register(variableName:String,key:Int,columns:Array[(String,DataType)]):Unit={
     variableInformationMap(variableName)=KeyArrayTypeVariable(variableName,key,columns)
   }
+
+  def register(variableName: String, key: Int, columns: Array[(String, DataType)],sorted:Boolean): Unit = {
+    variableInformationMap(variableName) = KeyGroupByTypeVariable(variableName, key, columns,sorted,0)
+  }
+
+  def register(variableName: String, key: Int, columns: Array[(String, DataType)], sorted: Boolean,sortIndex:Int): Unit = {
+    variableInformationMap(variableName) = KeyGroupByTypeVariable(variableName, key, columns, sorted, sortIndex)
+  }
   override def toString: String = {
     variableInformationMap.mkString("VariableInformation:\r\n","\r\n"," ")
   }
@@ -26,6 +34,6 @@ object VariableManager{
   private var num=0;
   def getNewVariableName:String={
     num+=1;
-    s"v${num}"
+    s"rdd${num}"
   }
 }
