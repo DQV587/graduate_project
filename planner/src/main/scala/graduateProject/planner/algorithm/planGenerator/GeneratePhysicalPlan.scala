@@ -2,6 +2,7 @@ package graduateProject.planner.algorithm.planGenerator
 
 import graduateProject.parser.CatalogManager
 import graduateProject.parser.implLib.ddl.SqlTable
+import graduateProject.planner.codeGenerator.GenerateCode
 import graduateProject.planner.entity.data_type.{DataType, LongDataType}
 import graduateProject.planner.entity.expression.Comparison
 import graduateProject.planner.entity.hypergraph.comparisonHypergraph.{ComparisonHyperGraph, ReduceComparisonInformation, ReduceInformation}
@@ -121,7 +122,7 @@ object GeneratePhysicalPlan {
     val comparisonIndex = comparisonMapToInt(comparison)
     val leftIndex = getVariableIndexFromArray(comparison.left.getVariables.head, columns)
     val rightIndex = getVariableIndexFromArray(comparison.right.getVariables.head, columns)
-    cqcActions.append(SelfFilterAction(otherRelationVariableName, afterFilterName, comparisonIndex, leftIndex, rightIndex))
+    cqcActions.append(SelfFilterAction(otherRelationVariableName, afterFilterName, comparisonIndex, leftIndex, rightIndex,comparison.data_type))
     variableManager.register(afterFilterName, otherRelationVariable.keyIndex, otherRelationVariable.columns)
     relationMapToVariable(relation) = afterFilterName
   }
@@ -206,7 +207,7 @@ object GeneratePhysicalPlan {
             .asInstanceOf[ArrayTypeVariable]
           val newName=VariableManager.getNewVariableName
           cqcActions.append(AggregatedTableArrayByKeyAction(thisRelationVariable.name,
-            newName,0,1,thisRelation.func))
+            newName,0,1,thisRelationVariable.columns(0)._2))
           relationMapToVariable(thisRelation)=newName
           val joinTreeEdge=reduceInformation.reducedJoinTreeEdge.get
           val sharedVariable=joinTreeEdge.sharedVariable.head
@@ -232,8 +233,6 @@ object GeneratePhysicalPlan {
           else{
             val reducedJoinTreeEdge=reduceInformation.reducedJoinTreeEdge.get
             val otherRelation=reducedJoinTreeEdge.getOtherRelation(thisRelation)
-            val otherRelationVariableName=relationMapToVariable(otherRelation)
-            val otherRelationVariableInformation=variableManager.get(otherRelationVariableName)
             val sharedVariable=reducedJoinTreeEdge.sharedVariable.head
             relationKeyedBy(thisRelation,sharedVariable,relationMapToVariable, variableManager, cqcActions)
             relationGroupByKey(thisRelation,relationMapToVariable, variableManager, cqcActions)
@@ -243,7 +242,10 @@ object GeneratePhysicalPlan {
               //reduced relation remain origin key-group structure
               case 0=>{
                 val newName=VariableManager.getNewVariableName
-                cqcActions.append(NoIncidentComparisonsReduce(otherRelationVariableName,newName))
+                val thisRelationName=relationMapToVariable(thisRelation)
+                val otherRelationVariableName = relationMapToVariable(otherRelation)
+                val otherRelationVariableInformation = variableManager.get(otherRelationVariableName)
+                cqcActions.append(NoIncidentComparisonsReduce(otherRelationVariableName,newName,thisRelationName))
                 variableManager.register(newName,otherRelationVariableInformation.asInstanceOf[KeyArrayTypeVariable].keyIndex,
                   otherRelationVariableInformation.asInstanceOf[KeyArrayTypeVariable].columns)
                 relationMapToVariable(otherRelation)=newName
@@ -263,7 +265,7 @@ object GeneratePhysicalPlan {
                   SortGroupByKeyAction(
                     oldName,
                     sortedName,
-                    sortIndex,
+                    (sortIndex,comparisonInformation.comparison.data_type),
                     comparisonMapToInt(comparisonInformation.comparison),
                     comparisonInformation.isLeft))
                 variableManager.register(sortedName,thisRelationVariable.keyIndex,thisRelationVariable.columns,
@@ -273,7 +275,8 @@ object GeneratePhysicalPlan {
                 // get Mf variable and append to other relation
                 val mfName=VariableManager.getNewVariableName
                 val thisRelationSortedVariable=variableManager.get(relationMapToVariable(thisRelation)).asInstanceOf[KeyGroupByTypeVariable]
-                cqcActions.append(GetMfFromSortedGroupByKeyAction(thisRelationSortedVariable.name,mfName))
+                cqcActions.append(GetMfFromSortedGroupByKeyAction(thisRelationSortedVariable.name,mfName,
+                  (sortIndex,thisRelationSortedVariable.columns(sortIndex)._2)))
                 variableManager.register(mfName,
                   thisRelationSortedVariable.columns(thisRelationSortedVariable.keyIndex),
                   thisRelationSortedVariable.columns(thisRelationSortedVariable.sortedByIndex))
@@ -318,8 +321,8 @@ object GeneratePhysicalPlan {
                 },
                   thisRelationVariable.columns)
                 cqcActions.append(SortByOneDimArrayAction(oldName,oneDimStructureName,
-                  index1,comparisonMapToInt(indexComparisonInformation.comparison),indexComparisonInformation.isLeft,
-                  index2,comparisonMapToInt(valueComparisonInformation.comparison),valueComparisonInformation.isLeft
+                  (index1,thisRelationVariable.columns(index1)._2),comparisonMapToInt(indexComparisonInformation.comparison),indexComparisonInformation.isLeft,
+                  (index2,thisRelationVariable.columns(index2)._2),comparisonMapToInt(valueComparisonInformation.comparison),valueComparisonInformation.isLeft
                 ))
                 variableManager.register(oneDimStructureName,thisRelationVariable.keyIndex,thisRelationVariable.columns,
                   index1, comparisonMapToInt(indexComparisonInformation.comparison), indexComparisonInformation.isLeft,
@@ -342,8 +345,10 @@ object GeneratePhysicalPlan {
                     indexComparisonInformation.comparison.left.getVariables.head
                 },otherRelationVariable.columns)
                 val newName=VariableManager.getNewVariableName
+                val mfVariable=variableManager.get(mfName).asInstanceOf[KeyTwoValueTypeVariable]
                 cqcActions.append(AppendKey2TupleAction(otherRelationVariable.name,mfName,
                   newName,compareValueIndex,comparisonMapToInt(indexComparisonInformation.comparison),
+                  mfVariable.value1._2,mfVariable.value2._2,
                   indexComparisonInformation.isLeft))
                 variableManager.register(newName,otherRelationVariable.keyIndex,otherRelationVariable.columns:+dim2)
                 relationMapToVariable(otherRelation)=newName
@@ -391,7 +396,8 @@ object GeneratePhysicalPlan {
     println(cqcAction.mkString("\r\n"))
     println(variableManager)
     println(relationMapToVariable.mkString("\r\n"))
-//    reduceInformationArray.foreach(x => println(x))
-    //    PhysicalPlan()
+    val builder=new mutable.StringBuilder()
+    GenerateCode(PhysicalPlan(beforeAction,cqcAction,List[AfterAction]()),builder)
+    println(builder.toString())
   }
 }

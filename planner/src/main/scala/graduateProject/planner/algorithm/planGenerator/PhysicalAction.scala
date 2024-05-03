@@ -29,42 +29,46 @@ case  class CreateSortComparisonFunctionAction(index:Int,
                                                operator: ComparisonOperator,
                                                dataType: DataType) extends BeforeAction
 
-trait AfterAction extends BasicAction
 
 trait CqcAction extends PhysicalAction
 
 trait ReduceAction extends CqcAction
-
-trait ArrayByKeyAction extends ReduceAction
-
+trait ArrayAction extends ReduceAction
 case class SourceTableArrayByKeyAction(oldName:String,
                                        newName:String,
-                                       key:(Int,DataType)) extends ArrayByKeyAction
+                                       key:(Int,DataType)) extends ArrayAction
 case class AggregatedTableArrayByKeyAction(oldName:String,
                                            newName:String,
                                            keyIndex:Int,
                                            valueIndex:Int,
-                                           func:String) extends ArrayByKeyAction
+                                           dataType: DataType) extends ArrayAction
+
+trait ArrayByKeyAction extends ReduceAction
+
 
 case class ReKeyAction(oldName:String,
                        newName:String,
                        key:(Int,DataType)) extends ArrayByKeyAction
 
 case class NoIncidentComparisonsReduce(oldName:String,
-                                       newName:String) extends ArrayByKeyAction
+                                       newName:String,
+                                       otherName:String) extends ArrayByKeyAction
 trait AppendMfAction extends ArrayByKeyAction
 case class AppendKeyValueAction(appendTo:String,appendFrom:String
                                 ,newName:String) extends AppendMfAction
 case class AppendKey2TupleAction(appendTo:String,appendFrom:String,newName:String,
                                  compareValueIndex:Int,
                                  comparisonIndex:Int,
+                                 dataType1: DataType,
+                                 dataType2: DataType,
                                  isLeft:Boolean) extends AppendMfAction
 
 case class SelfFilterAction(oldName:String,
                              newName:String,
                              comparisonIndex:Int,
                              leftIndex:Int,
-                             rightIndex:Int) extends ArrayByKeyAction
+                             rightIndex:Int,
+                             dataType: DataType) extends ArrayByKeyAction
 
 trait GroupByKeyAction extends ReduceAction
 case class KeyArrayGroupByKeyAction(oldName:String,
@@ -72,12 +76,13 @@ case class KeyArrayGroupByKeyAction(oldName:String,
 
 case class SortGroupByKeyAction(oldName:String,
                                 newName:String,
-                                valueIndex:Int,
+                                value:(Int,DataType),
                                 comparisonIndex:Int,
                                 isLeft:Boolean) extends GroupByKeyAction
 
 case class GetMfFromSortedGroupByKeyAction(oldName:String,
-                                           newName:String) extends GroupByKeyAction
+                                           newName:String,
+                                           value:(Int,DataType)) extends GroupByKeyAction
 
 
 
@@ -86,10 +91,10 @@ trait OneDimArrayByKeyAction extends ReduceAction
 
 case class SortByOneDimArrayAction(oldName:String,
                               newName:String,
-                              valueIndex1: Int,
+                              value1: (Int,DataType),
                               comparisonIndex1: Int,
                               isLeft1: Boolean,
-                              valueIndex2: Int,
+                              value2: (Int,DataType),
                               comparisonIndex2: Int,
                               isLeft2: Boolean
                              ) extends OneDimArrayByKeyAction
@@ -100,3 +105,4 @@ case class GetMfFromOneDimArrayAction(oldName:String,
 
 trait EnumerateAction extends CqcAction
 
+trait AfterAction extends BasicAction

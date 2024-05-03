@@ -24,7 +24,7 @@ object Main {
     val tmp = SQLParser.parseDml(dml)
     val ddl = "CREATE TABLE Graph (\n" +
       "    src INT,\n" + "    dst INT\n" + ") WITH (\n" +
-      "    'path' = 'examples/data/graph.dat'\n" +
+      "    'path' = 'experiment/data/vote.txt'\n" +
       ", "+
       "    'delimiter' = ' '\n" +
       ")"
