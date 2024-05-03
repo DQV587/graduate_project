@@ -43,8 +43,8 @@ object GenerateCode {
   }
 
   private def generateReadSourceTable(builder: mutable.StringBuilder, action: CreateTableFromFileAction): Unit = {
-    indent(builder, 2).append("val ").append(action.variableName).append(" = spark.sparkContext.textFile(")
-      .append(action.filePath).append(").map(row => {").append("\r\n")
+    indent(builder, 2).append("val ").append(action.variableName).append(" = spark.sparkContext.textFile(\"")
+      .append(action.filePath).append("\").map(row => {").append("\r\n")
     indent(builder, 3).append("val f = row.split(\"").append(action.delimiter).append("\")").append("\r\n")
 
     val fields = {for(i<-action.columns.indices)
@@ -83,7 +83,7 @@ object GenerateCode {
     indent(builder,2).append("val ")
       .append(s"sortFunc${action.index} = (x: ")
       .append(action.dataType.getScalaTypeName)
-      .append(", y= ").append(action.dataType.getScalaTypeName)
+      .append(", y: ").append(action.dataType.getScalaTypeName)
       .append(") => x ").append(action.operator.toString).append(" y")
     newLine(builder)
   }
@@ -106,8 +106,8 @@ object GenerateCode {
       .append(action.oldName).append(s".map(x => (${action.dataType.castFromAny(s"x(${action.keyIndex})")}, x(${action.valueIndex})))").append("\r\n")
   }
   private def generateReKeyAction(builder: mutable.StringBuilder,action:ReKeyAction):Unit={
-    indent(builder, 2).append("val ").append(action.oldName).append(" = ")
-      .append(action.newName).append(".reKeyBy(x => ")
+    indent(builder, 2).append("val ").append(action.newName).append(" = ")
+      .append(action.oldName).append(".reKeyBy(x => ")
       .append(action.key._2.castFromAny(s"x(${action.key._1})"))
       .append(")").append("\r\n")
   }
@@ -119,7 +119,7 @@ object GenerateCode {
   private def generateAppendCommonExtraColumnAction(builder: mutable.StringBuilder, action: AppendKeyValueAction): Unit = {
     indent(builder, 2).append("val ").append(action.newName).append(" = ")
       .append(action.appendTo).append(".appendMf(")
-      .append(action.appendFrom).append(")").append("\n")
+      .append(action.appendFrom).append(")").append("\r\n")
   }
   private def generateGetValueFuncAction(index:Int,dataType: DataType):String={
     s"(array:Array[Any])=>${dataType.castFromAny(s"array(${index})")}"
@@ -139,10 +139,10 @@ object GenerateCode {
   }
   private def generateAppendComparisonExtraColumnAction(builder: mutable.StringBuilder, action: AppendKey2TupleAction): Unit = {
     indent(builder, 2).append("val ").append(action.newName).append(" = ")
-      .append(action.appendTo).append(".appendMf[")
+      .append(action.appendTo).append(".appendMf")
       .append(s"[${action.dataType1.getScalaTypeName}, ${action.dataType2.getScalaTypeName}](")
       .append(action.appendFrom).append(", ")
-      .append(generateGetValueFuncAction(action.compareValueIndex,action.dataType1))
+      .append(generateGetValueFuncAction(action.compareValueIndex,action.dataType1)).append(", ")
       .append(generateParameterDeclaration(action.dataType1))
       .append(generateComparisonFuncName(action.comparisonIndex))
       .append(generateCompareFuncParameters(action.isLeft)).append(")").append("\r\n")
@@ -213,7 +213,33 @@ object GenerateCode {
     }
   }
 
+  def generateFormatResultAction(builder: mutable.StringBuilder, action: PersistResultAction): Unit = {
+    val mapFunc = action.outputMap.map(i=>s"x._2($i)").mkString("x => Array(", ", ", ")")
+    newLine(builder)
+    indent(builder, 2).append("val ").append(action.newName).append(" = ")
+      .append(action.resultName).append(".map(").append(mapFunc).append(")").append("\r\n")
+    indent(builder, 2).append(action.newName).append(".take(20).map(r => r.mkString(\",\")).foreach(println)").append("\r\n")
+    indent(builder, 2).append("println(\"only showing top 20 rows\")").append("\r\n")
+  }
+
+  def generateCountResultAction(builder: mutable.StringBuilder, action: CountResultAction): Unit = {
+    if (getLogger.nonEmpty) {
+      newLine(builder)
+      indent(builder, 2).append("val ts1 = System.currentTimeMillis()").append("\r\n")
+      indent(builder, 2).append("val cnt = ").append(action.resultName).append(".count()").append("\r\n")
+      indent(builder, 2).append("val ts2 = System.currentTimeMillis()").append("\r\n")
+      indent(builder, 2).append("LOGGER.info(\"").append(getName).append("-SparkCQC cnt: \" + cnt)").append("\r\n")
+      indent(builder, 2).append("LOGGER.info(\"").append(getName).append("-SparkCQC time: \" + (ts2 - ts1) / 1000f)").append("\r\n")
+    } else {
+      newLine(builder)
+      indent(builder, 2).append(action.resultName).append(".count()").append("\n")
+    }
+  }
   def generateAfterAction(afterActions:List[AfterAction],builder:mutable.StringBuilder): Unit = {
+    afterActions.foreach {
+      case countResultAction: CountResultAction=>generateCountResultAction(builder,countResultAction)
+      case persistResultAction: PersistResultAction=>generateFormatResultAction(builder,persistResultAction)
+    }
   }
   private def generateExecuteMethod(plan:PhysicalPlan, builder: mutable.StringBuilder): Unit = {
     indent(builder, 1).append("def main(args: Array[String]): Unit = {").append("\r\n")

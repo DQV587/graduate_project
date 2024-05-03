@@ -61,7 +61,6 @@ object Query3SparkCQC {
 		val ts1 = System.currentTimeMillis()
 		val cnt = v30.count()
 		val ts2 = System.currentTimeMillis()
-		LOGGER.info("original data cnt:" + cnt0)
 		LOGGER.info("Query3-SparkSQLPlus cnt: " + cnt)
 		LOGGER.info("Query3-SparkSQLPlus time: " + (ts2 - ts1) / 1000f)
 

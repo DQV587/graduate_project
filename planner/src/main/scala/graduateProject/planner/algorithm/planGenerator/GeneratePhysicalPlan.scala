@@ -13,6 +13,8 @@ import graduateProject.planner.entity.query.Query
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
+import java.io.{File, PrintWriter}
+
 object GeneratePhysicalPlan {
 
   def getSourceTableNames(relations: Set[Relation]):Set[String]={
@@ -193,7 +195,12 @@ object GeneratePhysicalPlan {
     })
     beforeActionList.toList
   }
-  def getCqcActions(reduceInformationList:List[ReduceInformation],
+  def getOutputIndices(columns:Array[(String,DataType)],output:List[Variable]):List[Int]={
+
+    List()
+  }
+  def getCqcActions(query: Query,
+                    reduceInformationList:List[ReduceInformation],
                     relationMapToVariable: mutable.Map[Relation, String],
                     comparisonMapToInt: mutable.Map[Comparison, Int],
                     variableManager: VariableManager ):List[CqcAction]={
@@ -228,7 +235,20 @@ object GeneratePhysicalPlan {
           val thisRelation=tableScanRelation
           //the last relation, reduce phase completed, begin enumeration phase
           if(reduceInformation.reducedJoinTreeEdge.isEmpty){
+            val outputColumns=query.output
+            var curEnumeratePhaseVariable=variableManager.get(relationMapToVariable(reduceInformation.relation)).asInstanceOf[KeyArrayTypeVariable]
+            while(enumeratePhaseStack.nonEmpty){
+              val curEnumerateInformation=enumeratePhaseStack.pop()
+              val otherRelation=curEnumerateInformation.relation
+              val sharedVariable=curEnumerateInformation.reducedJoinTreeEdge.get.sharedVariable.head
+              curEnumerateInformation.reduceComparisonInformation.size match {
+                case 0=>{}
+                case 1=>
+                case 2=>
+                case _=>
+              }
 
+            }
           }
           else{
             val reducedJoinTreeEdge=reduceInformation.reducedJoinTreeEdge.get
@@ -369,35 +389,38 @@ object GeneratePhysicalPlan {
     })
     cqcActions.toList
   }
+
+  def getAfterActions(mode:String="count",outputMap:List[Int]):List[AfterAction] ={
+    if(mode.equals("count"))
+      List(CountResultAction("result"))
+    else if(mode.equals("output"))
+      List(PersistResultAction(VariableManager.getNewVariableName,"result",
+        outputMap))
+    else List()
+  }
+  def getOutputMap(variableManager:VariableManager,output:List[Variable]):List[Int]={
+    val curColumns=variableManager.get("result").asInstanceOf[KeyArrayTypeVariable].columns
+    val result=mutable.ListBuffer[Int]()
+    output.foreach(variable=>result.append(getVariableIndexFromArray(variable,curColumns)))
+    result.toList
+  }
   def apply(catalog: CatalogManager, query: Query, comparisonHyperGraph: ComparisonHyperGraph): Unit = {
     val relationMapToVariable=mutable.Map[Relation,String]()
     val comparisonMapToInt=mutable.Map[Comparison,Int]()
     val variableManager=new VariableManager()
-
-    val beforeAction=getBeforeActions(catalog, query,
-      relationMapToVariable, comparisonMapToInt, variableManager)
-
-    val reduceInformationArray = mutable.ArrayBuffer[ReduceInformation]()
-    val nodeNum = comparisonHyperGraph.nodeSet.size
-    for (i <- 0 to nodeNum) {
-      val reducibleRelationSet = comparisonHyperGraph.getReducibleRelations
-      val nextReduceRelation={
-        if(reducibleRelationSet.forall(relation=>relation.isInstanceOf[TableScanRelation]))
-          reducibleRelationSet.head
-        else
-          reducibleRelationSet.filter(relation=>relation.isInstanceOf[AggregatedRelation]).head
-      }
-      val information = comparisonHyperGraph.reduceRelation(nextReduceRelation)
-      reduceInformationArray.append(information)
-    }
-    val cqcAction=getCqcActions(reduceInformationArray.toList,relationMapToVariable,
+    val beforeAction=getBeforeActions(catalog, query, relationMapToVariable, comparisonMapToInt, variableManager)
+    val reduceInformationList=ReducePlanGenerator(comparisonHyperGraph)
+    val cqcAction=getCqcActions(query,reduceInformationList,relationMapToVariable,
       comparisonMapToInt, variableManager)
 
     println(cqcAction.mkString("\r\n"))
     println(variableManager)
     println(relationMapToVariable.mkString("\r\n"))
     val builder=new mutable.StringBuilder()
-    GenerateCode(PhysicalPlan(beforeAction,cqcAction,List[AfterAction]()),builder)
-    println(builder.toString())
+    val afterAction=getAfterActions("count",getOutputMap(variableManager,query.output))
+    GenerateCode(PhysicalPlan(beforeAction,cqcAction,afterAction),builder)
+    val write = new PrintWriter(new File("experiment/src/main/scala/QueryProcess.scala"))
+    write.write(builder.toString())
+    write.close()
   }
 }

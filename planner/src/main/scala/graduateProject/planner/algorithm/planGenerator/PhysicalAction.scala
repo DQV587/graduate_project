@@ -106,3 +106,5 @@ case class GetMfFromOneDimArrayAction(oldName:String,
 trait EnumerateAction extends CqcAction
 
 trait AfterAction extends BasicAction
+case class CountResultAction(resultName:String) extends AfterAction
+case class PersistResultAction(newName:String,resultName:String,outputMap: List[Int]) extends AfterAction
