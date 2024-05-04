@@ -104,7 +104,23 @@ case class GetMfFromOneDimArrayAction(oldName:String,
                                      ) extends OneDimArrayByKeyAction
 
 trait EnumerateAction extends CqcAction
+case class EnumerateWithNoComparisonAction(oldName:String, newName:String, otherName:String,
+                                            thisIndices:List[Int], otherIndices:List[Int],
+                                            keyType:DataType) extends EnumerateAction
 
+case class EnumerateWithOneComparisonAction(oldName: String, newName: String, otherName: String,
+                                            valueIndex1:Int,valueIndex2:Int,
+                                            comparisonIndex:Int,isLeft:Boolean,comparisonType:DataType,
+                                            thisIndices: List[Int], otherIndices: List[Int],
+                                            keyType: DataType) extends EnumerateAction
+case class EnumerateWithTwoComparisonsAction(oldName:String, newName:String, otherName:String,
+                                             valueIndex1:Int, valueType1:DataType,
+                                             valueIndex2:Int, valueType2:DataType,
+                                             thisIndices: List[Int], otherIndices: List[Int],
+                                             keyType:DataType
+                                           ) extends EnumerateAction
+
+case class CompleteAction(oldName:String, newName:String) extends CqcAction
 trait AfterAction extends BasicAction
 case class CountResultAction(resultName:String) extends AfterAction
 case class PersistResultAction(newName:String,resultName:String,outputMap: List[Int]) extends AfterAction

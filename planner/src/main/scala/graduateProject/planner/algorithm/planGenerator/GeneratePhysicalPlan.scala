@@ -195,10 +195,11 @@ object GeneratePhysicalPlan {
     })
     beforeActionList.toList
   }
-  def getOutputIndices(columns:Array[(String,DataType)],output:List[Variable]):List[Int]={
-
-    List()
+  def getOutputIndices(columns:Array[(String,DataType)],output:Set[String]):List[Int]={
+    columns.indices.filter(i=>output.contains(columns(i)._1)).toList
   }
+
+
   def getCqcActions(query: Query,
                     reduceInformationList:List[ReduceInformation],
                     relationMapToVariable: mutable.Map[Relation, String],
@@ -235,20 +236,91 @@ object GeneratePhysicalPlan {
           val thisRelation=tableScanRelation
           //the last relation, reduce phase completed, begin enumeration phase
           if(reduceInformation.reducedJoinTreeEdge.isEmpty){
-            val outputColumns=query.output
-            var curEnumeratePhaseVariable=variableManager.get(relationMapToVariable(reduceInformation.relation)).asInstanceOf[KeyArrayTypeVariable]
+            val outputColumns=query.output.map(variable=>variable.name).toSet
             while(enumeratePhaseStack.nonEmpty){
               val curEnumerateInformation=enumeratePhaseStack.pop()
-              val otherRelation=curEnumerateInformation.relation
-              val sharedVariable=curEnumerateInformation.reducedJoinTreeEdge.get.sharedVariable.head
+              val otherRelation = curEnumerateInformation.relation
+              val sharedVariable = curEnumerateInformation.reducedJoinTreeEdge.get.sharedVariable.head
+              relationKeyedBy(thisRelation, sharedVariable, relationMapToVariable, variableManager, cqcActions)
+              val curEnumeratePhaseVariable=variableManager.get(relationMapToVariable(thisRelation)).asInstanceOf[KeyArrayTypeVariable]
+              val thisIndices=getOutputIndices(curEnumeratePhaseVariable.columns,outputColumns)
+              val newName=VariableManager.getNewVariableName
               curEnumerateInformation.reduceComparisonInformation.size match {
-                case 0=>{}
-                case 1=>
-                case 2=>
-                case _=>
+                case 0=>{
+                  val otherRelationVariable=variableManager.get(relationMapToVariable(otherRelation)).asInstanceOf[KeyArrayTypeVariable]
+                  val otherIndices=getOutputIndices(otherRelationVariable.columns,
+                    outputColumns--thisIndices.map(i=>curEnumeratePhaseVariable.columns(i)._1).toSet)
+                  cqcActions.append(EnumerateWithNoComparisonAction(curEnumeratePhaseVariable.name,newName,otherRelationVariable.name,
+                    thisIndices,otherIndices,curEnumeratePhaseVariable.columns(curEnumeratePhaseVariable.keyIndex)._2))
+                  val newColumns=(thisIndices.map(i=>curEnumeratePhaseVariable.columns(i))++otherIndices.map(i=>otherRelationVariable.columns(i))).toArray
+                  variableManager.register(newName,curEnumeratePhaseVariable.keyIndex,newColumns)
+                  relationMapToVariable(thisRelation)=newName
+                }
+                case 1=>{
+                  val reduceComparisonInformation=curEnumerateInformation.reduceComparisonInformation.head
+                  val comparison=reduceComparisonInformation.comparison
+                  val otherRelationVariable = variableManager.get(relationMapToVariable(otherRelation)).asInstanceOf[KeyGroupByTypeVariable]
+                  assert(otherRelationVariable.sorted)
+                  val otherIndices = getOutputIndices(otherRelationVariable.columns,
+                    outputColumns -- thisIndices.map(i => curEnumeratePhaseVariable.columns(i)._1).toSet)
+                  if(reduceComparisonInformation.isLeft)
+                    cqcActions.append(EnumerateWithOneComparisonAction(curEnumeratePhaseVariable.name,newName,otherRelationVariable.name,
+                      getVariableIndexFromArray(comparison.right.getVariables.head,curEnumeratePhaseVariable.columns),
+                      getVariableIndexFromArray(comparison.left.getVariables.head,otherRelationVariable.columns),
+                      comparisonMapToInt(comparison),isLeft = false,comparison.data_type,
+                      thisIndices,otherIndices,curEnumeratePhaseVariable.columns(curEnumeratePhaseVariable.keyIndex)._2))
+                  else
+                    cqcActions.append(EnumerateWithOneComparisonAction(curEnumeratePhaseVariable.name, newName, otherRelationVariable.name,
+                      getVariableIndexFromArray(comparison.left.getVariables.head, curEnumeratePhaseVariable.columns),
+                      getVariableIndexFromArray(comparison.right.getVariables.head, otherRelationVariable.columns),
+                      comparisonMapToInt(comparison), isLeft = true,comparison.data_type,
+                      thisIndices, otherIndices, curEnumeratePhaseVariable.columns(curEnumeratePhaseVariable.keyIndex)._2))
+                  val newColumns = (thisIndices.map(i => curEnumeratePhaseVariable.columns(i)) ++ otherIndices.map(i => otherRelationVariable.columns(i))).toArray
+                  variableManager.register(newName, curEnumeratePhaseVariable.keyIndex, newColumns)
+                  relationMapToVariable(thisRelation) = newName
+                }
+                case 2=>{
+                  val comparisonInformationArray = curEnumerateInformation.reduceComparisonInformation.toArray
+                  val index = {
+                    if (comparisonInformationArray.head.isLong) 1
+                    else 0
+                  }
+                  val indexComparisonInformation = comparisonInformationArray(index)
+                  val valueComparisonInformation = comparisonInformationArray(1 - index)
+                  val otherRelationVariable = variableManager.get(relationMapToVariable(otherRelation)).asInstanceOf[KeyOneDimArrayTypeVariable]
+                  val otherIndices = getOutputIndices(otherRelationVariable.columns,
+                    outputColumns -- thisIndices.map(i => curEnumeratePhaseVariable.columns(i)._1).toSet)
+                  val valueIndex1=getVariableIndexFromArray({
+                    if(indexComparisonInformation.isLeft)
+                      indexComparisonInformation.comparison.right.getVariables.head
+                    else
+                      indexComparisonInformation.comparison.left.getVariables.head
+                  }, curEnumeratePhaseVariable.columns)
+                  val valueIndex2= getVariableIndexFromArray({
+                    if (valueComparisonInformation.isLeft)
+                      valueComparisonInformation.comparison.right.getVariables.head
+                    else
+                      valueComparisonInformation.comparison.left.getVariables.head
+                  }, curEnumeratePhaseVariable.columns)
+                  cqcActions.append(EnumerateWithTwoComparisonsAction(curEnumeratePhaseVariable.name,newName,otherRelationVariable.name,
+                    valueIndex1,curEnumeratePhaseVariable.columns(valueIndex1)._2,
+                    valueIndex2,curEnumeratePhaseVariable.columns(valueIndex2)._2,
+                    thisIndices,otherIndices,
+                    curEnumeratePhaseVariable.columns(curEnumeratePhaseVariable.keyIndex)._2))
+                  val newColumns = (thisIndices.map(i => curEnumeratePhaseVariable.columns(i)) ++ otherIndices.map(i => otherRelationVariable.columns(i))).toArray
+                  variableManager.register(newName, curEnumeratePhaseVariable.keyIndex, newColumns)
+                  relationMapToVariable(thisRelation) = newName
+                }
+                case _=>{
+                  //TODO
+                }
               }
 
             }
+            val resultName="result"
+            val lastVariable=variableManager.get(relationMapToVariable(thisRelation)).asInstanceOf[KeyArrayTypeVariable]
+            cqcActions.append(CompleteAction(lastVariable.name,resultName))
+            variableManager.register(resultName,lastVariable.keyIndex,lastVariable.columns)
           }
           else{
             val reducedJoinTreeEdge=reduceInformation.reducedJoinTreeEdge.get
@@ -347,7 +419,7 @@ object GeneratePhysicalPlan {
                 variableManager.register(oneDimStructureName,thisRelationVariable.keyIndex,thisRelationVariable.columns,
                   index1, comparisonMapToInt(indexComparisonInformation.comparison), indexComparisonInformation.isLeft,
                   index2, comparisonMapToInt(valueComparisonInformation.comparison), valueComparisonInformation.isLeft)
-                relationMapToVariable(thisRelation)=oldName
+                relationMapToVariable(thisRelation)=oneDimStructureName
                 // get Mf column and append to the other relation
                 val mfName=VariableManager.getNewVariableName
                 val oneDimArrayVariable=variableManager.get(oneDimStructureName).asInstanceOf[KeyOneDimArrayTypeVariable]
@@ -412,10 +484,10 @@ object GeneratePhysicalPlan {
     val reduceInformationList=ReducePlanGenerator(comparisonHyperGraph)
     val cqcAction=getCqcActions(query,reduceInformationList,relationMapToVariable,
       comparisonMapToInt, variableManager)
-
-    println(cqcAction.mkString("\r\n"))
-    println(variableManager)
-    println(relationMapToVariable.mkString("\r\n"))
+//
+//    println(cqcAction.mkString("\r\n"))
+//    println(variableManager)
+//    println(relationMapToVariable.mkString("\r\n"))
     val builder=new mutable.StringBuilder()
     val afterAction=getAfterActions("count",getOutputMap(variableManager,query.output))
     GenerateCode(PhysicalPlan(beforeAction,cqcAction,afterAction),builder)

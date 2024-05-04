@@ -114,10 +114,10 @@ object CqcConversions {
         lIter.flatMap(l=>{
           val result=rArray.iterator(getValueFun1(l),getValueFun2(l)).map(
             r=>{
-            val newTuple=extractFields(l,r,indices1,indices2)
-            val newKey=if(newKeySelector==null) key
-            else newKeySelector(l,r)
-            (newKey.asInstanceOf[T],newTuple)
+              val newTuple=extractFields(l,r,indices1,indices2)
+              val newKey=if(newKeySelector==null) key
+              else newKeySelector(l,r)
+              (newKey.asInstanceOf[T],newTuple)
           })
           result
         })

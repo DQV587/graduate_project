@@ -196,6 +196,56 @@ object GenerateCode {
     indent(builder, 2).append("val ").append(action.newName).append(" = ")
       .append(action.oldName).append(".getMf").append("\r\n")
   }
+
+  private def generateEnumerateWithoutComparisonAction(builder: mutable.StringBuilder, action: EnumerateWithNoComparisonAction): Unit = {
+    indent(builder, 2).append("val ").append(action.newName).append(" = ")
+      .append(action.oldName).append(".enumerateWithNoComparison[")
+      .append(action.keyType.getScalaTypeName).append("](")
+      .append(action.otherName).append(", ")
+      .append(action.thisIndices.mkString("Array(", ",", ")")).append(", ")
+      .append(action.otherIndices.mkString("Array(", ",", ")"))
+//    if (action.resultKeySelectors.nonEmpty) {
+//      builder.append(", ").append(action.resultKeySelectors.map(s => s("l", "r")).mkString("(l, r) => (", ",", ")"))
+//    }
+    builder.append(")").append("\r\n")
+  }
+
+  private def generateEnumerateWithOneComparisonAction(builder: mutable.StringBuilder, action: EnumerateWithOneComparisonAction): Unit = {
+    indent(builder, 2).append("val ").append(action.newName).append(" = ")
+      .append(action.oldName).append(s".enumerateWithOneComparison[${action.keyType.getScalaTypeName},${action.comparisonType.getScalaTypeName}](")
+      .append(action.otherName).append(", ")
+      .append(generateGetValueFuncAction(action.valueIndex1,action.comparisonType)).append(", ")
+      .append(generateGetValueFuncAction(action.valueIndex2,action.comparisonType)).append(", ")
+      .append(generateParameterDeclaration(action.comparisonType))
+      .append(generateComparisonFuncName(action.comparisonIndex))
+      .append(generateCompareFuncParameters(action.isLeft)).append(", ")
+      .append(action.thisIndices.mkString("Array(", ",", ")")).append(", ")
+      .append(action.otherIndices.mkString("Array(", ",", ")"))
+
+//    if (action.resultKeySelectors.nonEmpty) {
+//      builder.append(", ").append(action.resultKeySelectors.map(s => s("l", "r")).mkString("(l, r) => (", ",", ")"))
+//    }
+    builder.append(")").append("\r\n")
+  }
+
+  private def generateEnumerateWithTwoComparisonsAction(builder: mutable.StringBuilder, action: EnumerateWithTwoComparisonsAction): Unit = {
+    indent(builder, 2).append("val ").append(action.newName).append(" = ")
+      .append(action.oldName).append(s".enumerateWithTwoComparisons[${action.keyType.getScalaTypeName},${action.valueType1.getScalaTypeName},${action.valueType2.getScalaTypeName}](")
+      .append(action.otherName).append(", ")
+      .append(generateGetValueFuncAction(action.valueIndex1, action.valueType1)).append(", ")
+      .append(generateGetValueFuncAction(action.valueIndex2, action.valueType2)).append(", ")
+      .append(action.thisIndices.mkString("Array(", ",", ")")).append(", ")
+      .append(action.otherIndices.mkString("Array(", ",", ")"))
+
+//    if (action.resultKeySelectors.nonEmpty) {
+//      builder.append(", ").append(action.resultKeySelectors.map(s => s("l", "r")).mkString("(l, r) => (", ",", ")"))
+//    }
+    builder.append(")").append("\r\n")
+  }
+  private def generateCompleteAction(builder: mutable.StringBuilder, action:CompleteAction):Unit={
+    indent(builder, 2).append("val ").append(action.newName).append(" = ")
+      .append(action.oldName).append("\r\n")
+  }
   private def generateCqcAction(cqcActions: List[CqcAction],builder:mutable.StringBuilder): Unit = {
     cqcActions.foreach{
       case sourceTableArrayByKeyAction: SourceTableArrayByKeyAction =>generateArrayByKeyAction(builder,sourceTableArrayByKeyAction)
@@ -210,6 +260,10 @@ object GenerateCode {
       case getMfFromSortedGroupByKeyAction: GetMfFromSortedGroupByKeyAction=>generateGetMfFromSortedGroupAction(builder,getMfFromSortedGroupByKeyAction)
       case sortByOneDimArrayAction: SortByOneDimArrayAction=>generateSortByOneDimArrayAction(builder,sortByOneDimArrayAction)
       case getMfFromOneDimArrayAction: GetMfFromOneDimArrayAction=>generateGetMfFromOneDimArrayAction(builder,getMfFromOneDimArrayAction)
+      case enumerateWithNoComparisonAction: EnumerateWithNoComparisonAction=>generateEnumerateWithoutComparisonAction(builder,enumerateWithNoComparisonAction)
+      case enumerateWithOneComparisonAction: EnumerateWithOneComparisonAction=>generateEnumerateWithOneComparisonAction(builder,enumerateWithOneComparisonAction)
+      case enumerateWithTwoComparisonsAction: EnumerateWithTwoComparisonsAction=>generateEnumerateWithTwoComparisonsAction(builder,enumerateWithTwoComparisonsAction)
+      case completeAction: CompleteAction=>generateCompleteAction(builder,completeAction)
     }
   }
 

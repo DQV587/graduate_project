@@ -36,14 +36,8 @@ object Main {
     val query=RelNodeToQuery.convert(root)
 
     val hyperGraph=RelationHyperGraph.constructFromQuery(query)
-//    println(hyperGraph.isAcyclic)
     val joinTreeSet=GYO(hyperGraph)
-//    println(joinTreeSet.head)
     val comparisonHyperGraph=JoinTreeToComparisonHyperGraph(joinTreeSet.head,query.comparisons.toSet)
-//    println(comparisonHyperGraph)
-//    println(comparisonHyperGraph.relationComparisonsMap)
-    val relationsCanBeReduced=comparisonHyperGraph.getReducibleRelations
-//    println(relationsCanBeReduced)
     val newGraph=comparisonHyperGraph.copy
     GeneratePhysicalPlan(catalogManager,query,newGraph)
 
