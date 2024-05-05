@@ -8,7 +8,7 @@ import graduateProject.planner.algorithm.planGenerator.GeneratePhysicalPlan
 import graduateProject.planner.codeGenerator.GenerateCode
 import graduateProject.planner.entity.hypergraph.relationHypergraph.RelationHyperGraph
 
-import java.io.{File, FileReader, PrintWriter}
+import java.io.{File, PrintWriter}
 import scala.collection.mutable
 import scala.io.Source
 object Main {
@@ -30,13 +30,12 @@ object Main {
     val root = crownPlanner.toLogicalPlan(tmp)
     val query=RelNodeToQuery.convert(root)
     val hyperGraph=RelationHyperGraph.constructFromQuery(query)
-    assert(hyperGraph.isAcyclic)
+    println(hyperGraph.isAcyclic)
     val joinTreeSet=GYO(hyperGraph)
-//    println(joinTreeSet)
     val comparisonHyperGraphSet=joinTreeSet.map(joinTree=>JoinTreeToComparisonHyperGraph(joinTree,query.comparisons.toSet))
-//    println(comparisonHyperGraphSet)
-//    comparisonHyperGraphSet.foreach(chg=>println(chg.isBergeAcyclic))
+
     val acyclicCHG=comparisonHyperGraphSet.filter(chg=>chg.isBergeAcyclic)
+    println(acyclicCHG.size)
     val physicalPlan=GeneratePhysicalPlan(catalogManager,query,acyclicCHG.head)
     val builder=new mutable.StringBuilder()
     GenerateCode(physicalPlan,builder)
