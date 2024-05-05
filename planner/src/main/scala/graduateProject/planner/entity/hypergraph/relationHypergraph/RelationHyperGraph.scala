@@ -36,7 +36,7 @@ class RelationHyperGraph(var nodeSet:Set[Variable],var edgeSet:Set[Relation]) ex
     val result=new ArrayBuffer[JoinTreeEdge]()
     for(potentialEar<-this.edgeSet){
       val thisVariableSet=potentialEar.getVariables()
-      for(potentialWitness<-this.edgeSet if !potentialEar.equals(potentialWitness)){
+      for(potentialWitness<-this.edgeSet if (!potentialEar.equals(potentialWitness))&&(potentialWitness.isInstanceOf[TableScanRelation])){
         val otherVariableSet=potentialWitness.getVariables()
         if((thisVariableSet&otherVariableSet).nonEmpty) {
           val restVariables = thisVariableSet &~ (thisVariableSet & otherVariableSet)
@@ -74,7 +74,7 @@ class RelationHyperGraph(var nodeSet:Set[Variable],var edgeSet:Set[Relation]) ex
     for(node<-getNodes){
       builder.append("\t").append(node.toString)
     }
-    builder.append("edges:\r\n")
+    builder.append("\r\nedges:\r\n")
     for(edge<-getEdges){
       builder.append("\t").append(edge.toString).append("\r\n")
     }

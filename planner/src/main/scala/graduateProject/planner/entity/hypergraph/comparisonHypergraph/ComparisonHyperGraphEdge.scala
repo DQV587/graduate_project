@@ -18,10 +18,10 @@ class ComparisonHyperGraphEdge(val comparison: Comparison,edges:Set[JoinTreeEdge
   //the relation to reduced is a leaf of the join tree, so there is only one edge whose son is exactly the relation.
   override def toString: String = {
     val builder=new mutable.StringBuilder()
-    builder.append("left relation: ").append(leftRelation.get).append("\r\n")
-    builder.append("right relation: ").append(rightRelation.get).append("\r\n")
+    builder.append("left relation: ").append(leftRelation.get).append("\t")
+    builder.append("right relation: ").append(rightRelation.get).append("\t")
     builder.append("isLongComparison:").append(isLongComparison).append("\t")
-    builder.append(comparison.toString).append("\r\n")
+    builder.append(comparison.toString).append("\t")
     builder.append(nodeSet.toString()).append("\r\n")
     builder.toString()
   }

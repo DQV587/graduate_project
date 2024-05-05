@@ -43,7 +43,8 @@ case class AggregatedRelation(val tableName: String, variables: Set[Variable],
   override def toString: String = {
     val columns = nodeSet.map(n => n.name + ":" + n.dataType).mkString("(", ",", ")")
     val groups = group.mkString("(", ",", ")")
-    s"AggregatedRelation[id=${getRelationId()}][source=$tableName][cols=$columns][group=$groups][func=$func]"
+//    s"AggregatedRelation[id=${getRelationId()}][source=$tableName][cols=$columns][group=$groups][func=$func]"
+    s"AggregatedRelation[id=${getRelationId()}]"
   }
 
   var nodeSet: Set[Variable] = variables
@@ -54,7 +55,8 @@ case class TableScanRelation(val tableName: String, variables: Set[Variable]) ex
 
   override def toString: String = {
     val columns = nodeSet.map(n => n.name + ":" + n.dataType).mkString("(", ",", ")")
-    s"TableScanRelation[id=${getRelationId()}][source=$tableName][cols=$columns]"
+//    s"TableScanRelation[id=${getRelationId()}][source=$tableName][cols=$columns]"
+    s"TableScanRelation[id=${getRelationId()}]"
   }
 
   var nodeSet: Set[Variable] = variables

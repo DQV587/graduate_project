@@ -476,7 +476,7 @@ object GeneratePhysicalPlan {
     output.foreach(variable=>result.append(getVariableIndexFromArray(variable,curColumns)))
     result.toList
   }
-  def apply(catalog: CatalogManager, query: Query, comparisonHyperGraph: ComparisonHyperGraph): Unit = {
+  def apply(catalog: CatalogManager, query: Query, comparisonHyperGraph: ComparisonHyperGraph): PhysicalPlan = {
     val relationMapToVariable=mutable.Map[Relation,String]()
     val comparisonMapToInt=mutable.Map[Comparison,Int]()
     val variableManager=new VariableManager()
@@ -484,15 +484,10 @@ object GeneratePhysicalPlan {
     val reduceInformationList=ReducePlanGenerator(comparisonHyperGraph)
     val cqcAction=getCqcActions(query,reduceInformationList,relationMapToVariable,
       comparisonMapToInt, variableManager)
-//
 //    println(cqcAction.mkString("\r\n"))
 //    println(variableManager)
 //    println(relationMapToVariable.mkString("\r\n"))
-    val builder=new mutable.StringBuilder()
     val afterAction=getAfterActions("count",getOutputMap(variableManager,query.output))
-    GenerateCode(PhysicalPlan(beforeAction,cqcAction,afterAction),builder)
-    val write = new PrintWriter(new File("experiment/src/main/scala/QueryProcess.scala"))
-    write.write(builder.toString())
-    write.close()
+    PhysicalPlan(beforeAction,cqcAction,afterAction)
   }
 }

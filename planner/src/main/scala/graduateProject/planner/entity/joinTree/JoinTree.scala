@@ -42,7 +42,7 @@ class JoinTree(var nodeSet: Set[Relation], var edgeSet: Set[JoinTreeEdge]) {
     if(!obj.isInstanceOf[JoinTree]) false
     else{
       val that=obj.asInstanceOf[JoinTree]
-      if(!that.nodeSet.equals(this.nodeSet)) {
+      if(that.nodeSet.equals(this.nodeSet)) {
         nodeSet.forall(relation=>{
           val relatedEdgeInThis=this.edgeSet.filter(edge=>edge.isRelatedToRelation(relation))
           val relatedEdgeInThat=that.edgeSet.filter(edge=>edge.isRelatedToRelation(relation))
@@ -53,7 +53,7 @@ class JoinTree(var nodeSet: Set[Relation], var edgeSet: Set[JoinTreeEdge]) {
           }
         })
       }
-      else true
+      else false
     }
   }
   override def toString: String = {
