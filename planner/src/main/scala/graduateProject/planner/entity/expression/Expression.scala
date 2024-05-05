@@ -12,7 +12,7 @@ case class BinaryExpression(operator: CalculateOperator,left: Expression,right:E
 
 
     def getComputeFunction: String ={
-        s"(${left.toString}) ${operator.toString} (${right.toString})"
+        s"(${left.toString} ${operator.toString} ${right.toString})"
     }
     def getOperator: String =this.operator.toString
     override def getType: DataType = this.dataType

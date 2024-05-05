@@ -2,7 +2,7 @@ import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
 import org.slf4j.LoggerFactory
 
-object Query3SparkSQL {
+object Query2SparkSQL {
     val LOGGER = LoggerFactory.getLogger("SparkSQLPlusExperiment")
 
     def main(args: Array[String]): Unit = {

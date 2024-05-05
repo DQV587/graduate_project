@@ -13,7 +13,7 @@ import scala.collection.mutable
 import scala.io.Source
 object Main {
   def main(args: Array[String]) {
-    val sqlPath="sql/sql2"
+    val sqlPath="sql/sql3"
     val ddlPath=sqlPath+"/ddl.txt"
     val dmlPath=sqlPath+"/dml.txt"
     val ddlSource=Source.fromFile(ddlPath)

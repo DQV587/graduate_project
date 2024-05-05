@@ -167,7 +167,7 @@ object GenerateCode {
       .append(generateParameterDeclaration(action.value._2))
       .append(generateSortFuncName(action.comparisonIndex))
       .append(generateCompareFuncParameters(action.isLeft))
-      .append(").persist()").append("\r\n")
+      .append(")").append("\r\n")
 
   }
   private def generateGetMfFromSortedGroupAction(builder: mutable.StringBuilder,action:GetMfFromSortedGroupByKeyAction):Unit={
