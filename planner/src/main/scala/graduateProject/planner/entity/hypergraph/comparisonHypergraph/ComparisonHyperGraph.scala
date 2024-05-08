@@ -36,6 +36,7 @@ class ComparisonHyperGraph( val joinTree:JoinTree,edges:Set[ComparisonHyperGraph
     // create a bipartite graph with the comparisons as one set and the joinTreeEdges as another set.
     // one element from the joinTreeEdges set is connected with one element from the comparisons set
     // if and only if the comparison contains the joinTreeEdge
+    if(this.edgeSet.isEmpty) return true
     val nodesInBipartiteGraph: Set[Either[ComparisonHyperGraphEdge, JoinTreeEdge]] = edges.map(cmp => Left(cmp)) ++
       nodes.map(joinTreeEdge => Right(joinTreeEdge))
     val nodesInBipartiteGraphToId: Map[Either[ComparisonHyperGraphEdge, JoinTreeEdge], Int] = nodesInBipartiteGraph.zipWithIndex.toMap

@@ -1,7 +1,7 @@
 <component name="ArtifactManager">
-  <artifact type="jar" name="query1CQC">
-    <output-path>$PROJECT_DIR$/out/artifacts/query1CQC</output-path>
-    <root id="archive" name="experiment.jar">
+  <artifact type="jar" name="experimentCQC1">
+    <output-path>$PROJECT_DIR$/out/artifacts/experimentCQC1</output-path>
+    <root id="archive" name="experimentCQC1.jar">
       <element id="module-output" name="experiment" />
       <element id="module-output" name="basicLib" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/com/esotericsoftware/minlog/1.3.0/minlog-1.3.0.jar" path-in-jar="/" />

@@ -4,7 +4,7 @@ import graduateProject.parser.CatalogManager
 import graduateProject.parser.implLib.SQLParser
 import graduateProject.parser.plan.SqlPlanner
 import graduateProject.planner.algorithm.innerRepresentation.{GYO, JoinTreeToComparisonHyperGraph, RelNodeToQuery}
-import graduateProject.planner.algorithm.planGenerator.GeneratePhysicalPlan
+import graduateProject.planner.algorithm.planGenerator.{GeneratePhysicalPlan, ReducePlanGenerator}
 import graduateProject.planner.codeGenerator.GenerateCode
 import graduateProject.planner.entity.hypergraph.relationHypergraph.RelationHyperGraph
 
@@ -36,7 +36,9 @@ object Main {
 
     val acyclicCHG=comparisonHyperGraphSet.filter(chg=>chg.isBergeAcyclic)
     println(acyclicCHG.size)
-    val physicalPlan=GeneratePhysicalPlan(catalogManager,query,acyclicCHG.head)
+    val comparisonHyperGraph=acyclicCHG.head
+    val reduceInformationList=ReducePlanGenerator(comparisonHyperGraph)
+    val physicalPlan=GeneratePhysicalPlan(catalogManager,query,reduceInformationList)
     val builder=new mutable.StringBuilder()
     GenerateCode(physicalPlan,builder)
     val write = new PrintWriter(new File("experiment/src/main/scala/QueryProcess.scala"))

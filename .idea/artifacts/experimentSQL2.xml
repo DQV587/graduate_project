@@ -1,7 +1,7 @@
 <component name="ArtifactManager">
-  <artifact type="jar" name="experimentSQL1">
-    <output-path>$PROJECT_DIR$/out/artifacts/experimentSQL1</output-path>
-    <root id="archive" name="experimentSQL1.jar">
+  <artifact type="jar" name="experimentSQL2">
+    <output-path>$PROJECT_DIR$/out/artifacts/experimentSQL2</output-path>
+    <root id="archive" name="experimentSQL2.jar">
       <element id="module-output" name="experiment" />
       <element id="module-output" name="basicLib" />
       <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/apache/parquet/parquet-column/1.10.1/parquet-column-1.10.1.jar" path-in-jar="/" />

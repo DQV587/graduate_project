@@ -2,15 +2,14 @@ import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
 import org.slf4j.LoggerFactory
 
-object Query2SparkSQL {
+object Query3SparkSQL {
     val LOGGER = LoggerFactory.getLogger("SparkSQLPlusExperiment")
 
     def main(args: Array[String]): Unit = {
         val conf = new SparkConf()
         conf.setAppName("Query3SparkSQL")
-        assert(args.length == 2)
+        assert(args.length == 1)
         val path = args(0)
-        val k = args(1).toInt
         val spark = SparkSession.builder.config(conf).getOrCreate()
 
         val schema0 = "src INTEGER, dst INTEGER"
@@ -24,17 +23,10 @@ object Query2SparkSQL {
         df0.createOrReplaceTempView("Graph")
 
         val result = spark.sql(
-            s"SELECT g1.src AS src, g1.dst AS via1, g3.src AS via2, g3.dst AS dst, " +
-                "c1.cnt AS cnt1, c2.cnt AS cnt2, c3.cnt AS cnt3, c4.cnt AS cnt4 " +
-                "FROM Graph AS g1, Graph AS g2, Graph AS g3, " +
-                "(SELECT src, COUNT(*) AS cnt FROM Graph GROUP BY src) AS c1, " +
-                "(SELECT src, COUNT(*) AS cnt FROM Graph GROUP BY src) AS c2, " +
-                "(SELECT src, COUNT(*) AS cnt FROM Graph GROUP BY src) AS c3, " +
-                "(SELECT dst, COUNT(*) AS cnt FROM Graph GROUP BY dst) AS c4 " +
-                "WHERE g1.dst = g2.src AND g2.dst = g3.src " +
-                "AND c1.src = g1.src AND c2.src = g3.dst " +
-                "AND c3.src = g2.src AND c4.dst = g3.dst " +
-                s"AND c1.cnt < c2.cnt+$k AND c3.cnt < c4.cnt"
+           " SELECT g1.src AS src, g1.dst AS via1, g3.src AS via2, g3.dst AS dst "+
+        "FROM Graph AS g1, Graph AS g2, Graph AS g3 "+
+        "WHERE g1.dst = g2.src AND g2.dst = g3.src"
+
         )
 
         val ts1 = System.currentTimeMillis()

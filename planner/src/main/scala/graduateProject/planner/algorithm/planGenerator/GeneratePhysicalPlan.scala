@@ -247,7 +247,7 @@ object GeneratePhysicalPlan {
               val newName=VariableManager.getNewVariableName
               curEnumerateInformation.reduceComparisonInformation.size match {
                 case 0=>{
-                  val otherRelationVariable=variableManager.get(relationMapToVariable(otherRelation)).asInstanceOf[KeyArrayTypeVariable]
+                  val otherRelationVariable=variableManager.get(relationMapToVariable(otherRelation)).asInstanceOf[KeyGroupByTypeVariable]
                   val otherIndices=getOutputIndices(otherRelationVariable.columns,
                     outputColumns--thisIndices.map(i=>curEnumeratePhaseVariable.columns(i)._1).toSet)
                   cqcActions.append(EnumerateWithNoComparisonAction(curEnumeratePhaseVariable.name,newName,otherRelationVariable.name,
@@ -476,17 +476,13 @@ object GeneratePhysicalPlan {
     output.foreach(variable=>result.append(getVariableIndexFromArray(variable,curColumns)))
     result.toList
   }
-  def apply(catalog: CatalogManager, query: Query, comparisonHyperGraph: ComparisonHyperGraph): PhysicalPlan = {
+  def apply(catalog: CatalogManager, query: Query, reduceInformationList: List[ReduceInformation]): PhysicalPlan = {
     val relationMapToVariable=mutable.Map[Relation,String]()
     val comparisonMapToInt=mutable.Map[Comparison,Int]()
     val variableManager=new VariableManager()
     val beforeAction=getBeforeActions(catalog, query, relationMapToVariable, comparisonMapToInt, variableManager)
-    val reduceInformationList=ReducePlanGenerator(comparisonHyperGraph)
     val cqcAction=getCqcActions(query,reduceInformationList,relationMapToVariable,
       comparisonMapToInt, variableManager)
-//    println(cqcAction.mkString("\r\n"))
-//    println(variableManager)
-//    println(relationMapToVariable.mkString("\r\n"))
     val afterAction=getAfterActions("count",getOutputMap(variableManager,query.output))
     PhysicalPlan(beforeAction,cqcAction,afterAction)
   }
