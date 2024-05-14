@@ -26,7 +26,7 @@ class ComparisonHyperGraphEdge(val comparison: Comparison,edges:Set[JoinTreeEdge
     builder.toString()
   }
   def copy:ComparisonHyperGraphEdge={
-    new ComparisonHyperGraphEdge(comparison, edges, left, right)
+    new ComparisonHyperGraphEdge(comparison, nodeSet, leftRelation, rightRelation)
   }
   def reduceIncidentRelation(relation: Relation):ReduceComparisonInformation={
     val isLeft:Boolean=this.leftRelation.get.equals(relation)

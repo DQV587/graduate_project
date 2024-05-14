@@ -37,8 +37,9 @@ object Main {
     val acyclicCHG=comparisonHyperGraphSet.filter(chg=>chg.isBergeAcyclic)
     println(acyclicCHG.size)
     val comparisonHyperGraph=acyclicCHG.head
-    val reduceInformationList=ReducePlanGenerator(comparisonHyperGraph)
-    val physicalPlan=PhysicalPlanGenerator(catalogManager,query,reduceInformationList)
+    val reducePlanSet=ReducePlanGenerator(comparisonHyperGraph)
+    println(reducePlanSet.size)
+    val physicalPlan=PhysicalPlanGenerator(catalogManager,query,reducePlanSet.head)
     val builder=new mutable.StringBuilder()
     GenerateCode(physicalPlan,builder)
     val write = new PrintWriter(new File("experiment/src/main/scala/QueryProcess.scala"))
