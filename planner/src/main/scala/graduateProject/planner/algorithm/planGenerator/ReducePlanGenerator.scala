@@ -7,6 +7,9 @@ import scala.collection.mutable
 
 object ReducePlanGenerator {
   def apply(comparisonHyperGraph: ComparisonHyperGraph):List[ReduceInformation]={
+    val reducePlanSet = mutable.Stack[ReduceState]()
+    reducePlanSet.push(ReduceState(List[ReduceInformation](),comparisonHyperGraph))
+
     val reduceInformationArray = mutable.ArrayBuffer[ReduceInformation]()
     val nodeNum = comparisonHyperGraph.nodeSet.size
     for (i <- 0 to nodeNum) {

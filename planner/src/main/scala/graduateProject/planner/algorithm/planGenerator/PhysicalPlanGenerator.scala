@@ -2,8 +2,7 @@ package graduateProject.planner.algorithm.planGenerator
 
 import graduateProject.parser.CatalogManager
 import graduateProject.parser.implLib.ddl.SqlTable
-import graduateProject.planner.codeGenerator.GenerateCode
-import graduateProject.planner.entity.data_type.{DataType, LongDataType}
+import graduateProject.planner.entity.dataType.{DataType, LongDataType}
 import graduateProject.planner.entity.expression.Comparison
 import graduateProject.planner.entity.hypergraph.comparisonHypergraph.{ComparisonHyperGraph, ReduceComparisonInformation, ReduceInformation}
 import graduateProject.planner.entity.hypergraph.relationHypergraph.{AggregatedRelation, Relation, TableScanRelation, Variable}
@@ -15,7 +14,7 @@ import scala.collection.mutable.ArrayBuffer
 
 import java.io.{File, PrintWriter}
 
-object GeneratePhysicalPlan {
+object PhysicalPlanGenerator {
 
   def getSourceTableNames(relations: Set[Relation]):Set[String]={
     relations.map(relation=>relation.getTableName())

@@ -1,7 +1,7 @@
 package graduateProject.planner.algorithm.planGenerator
 
 import graduateProject.parser.implLib.ddl.SqlTable.TableColumn
-import graduateProject.planner.entity.data_type.DataType
+import graduateProject.planner.entity.dataType.DataType
 import graduateProject.planner.entity.expression.{ComparisonOperator, Expression}
 
 trait PhysicalAction

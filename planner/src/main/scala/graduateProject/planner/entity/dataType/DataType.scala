@@ -1,4 +1,4 @@
-package graduateProject.planner.entity.data_type
+package graduateProject.planner.entity.dataType
 
 import org.apache.calcite.sql.`type`.SqlTypeName
 import org.apache.calcite.sql.`type`.SqlTypeName.{BIGINT, DOUBLE, INTEGER}

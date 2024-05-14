@@ -1,6 +1,6 @@
 package graduateProject.planner.entity.expression
 
-import graduateProject.planner.entity.data_type._
+import graduateProject.planner.entity.dataType._
 import graduateProject.planner.entity.hypergraph.relationHypergraph.Variable
 
 sealed trait Expression {

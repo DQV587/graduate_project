@@ -1,6 +1,6 @@
 package graduateProject.planner.algorithm.planGenerator
 
-import graduateProject.planner.entity.data_type.DataType
+import graduateProject.planner.entity.dataType.DataType
 import graduateProject.planner.entity.physicalPlanVariable._
 
 import scala.collection.mutable

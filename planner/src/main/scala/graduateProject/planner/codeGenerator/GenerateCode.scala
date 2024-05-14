@@ -1,7 +1,7 @@
 package graduateProject.planner.codeGenerator
 
 import graduateProject.planner.algorithm.planGenerator._
-import graduateProject.planner.entity.data_type.DataType
+import graduateProject.planner.entity.dataType.DataType
 
 import scala.collection.mutable
 

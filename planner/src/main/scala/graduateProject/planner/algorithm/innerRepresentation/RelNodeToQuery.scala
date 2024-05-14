@@ -1,6 +1,6 @@
 package graduateProject.planner.algorithm.innerRepresentation
 
-import graduateProject.planner.entity.data_type._
+import graduateProject.planner.entity.dataType._
 import graduateProject.planner.entity.expression._
 import graduateProject.planner.entity.hypergraph.relationHypergraph.{Relation, Variable}
 import graduateProject.planner.entity.query.Query

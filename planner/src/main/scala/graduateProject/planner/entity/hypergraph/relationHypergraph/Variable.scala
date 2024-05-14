@@ -1,6 +1,6 @@
 package graduateProject.planner.entity.hypergraph.relationHypergraph
 
-import graduateProject.planner.entity.data_type.DataType
+import graduateProject.planner.entity.dataType.DataType
 
 class Variable(val name: String,val dataType: DataType) {
   def getName:String=this.name

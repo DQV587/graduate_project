@@ -1,6 +1,6 @@
 package graduateProject.planner.entity.expression
 
-import graduateProject.planner.entity.data_type.DataType
+import graduateProject.planner.entity.dataType.DataType
 
 case class Comparison(operator:ComparisonOperator,left:Expression,right:Expression) {
   val data_type:DataType=DataType.typeCast(left.getType,right.getType)

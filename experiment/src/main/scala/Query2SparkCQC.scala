@@ -22,9 +22,9 @@ object Query2SparkCQC {
 		GraphAggregatedWithValue1ByCOUNT.count()
 		val GraphAggregatedWithValue0ByCOUNT = Graph.map(f => (f(0), 1L)).reduceByKey(_ + _).map(x => Array[Any](x._1, x._2)).persist()
 		GraphAggregatedWithValue0ByCOUNT.count()
-		val comparisonFunc1 = (v8: Long, v10: Long) => v8 < v10
+		val comparisonFunc1 = (v8: Long, v10: Long) => v8 < (v10+k)
 		val sortFunc1 = (x: Long, y: Long) => x < y
-		val comparisonFunc2 = (v12: Long, v14: Long) => v12 < (v14 + k)
+		val comparisonFunc2 = (v12: Long, v14: Long) => v12 < v14
 		val sortFunc2 = (x: Long, y: Long) => x < y
 		val rdd1 = GraphAggregatedWithValue0ByCOUNT.map(x => (x(0).asInstanceOf[Int], x(1)))
 		val rdd2 = Graph.keyBy(x => x(1).asInstanceOf[Int])

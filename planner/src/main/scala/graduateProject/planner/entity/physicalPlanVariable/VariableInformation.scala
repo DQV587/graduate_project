@@ -1,6 +1,6 @@
 package graduateProject.planner.entity.physicalPlanVariable
 
-import graduateProject.planner.entity.data_type.DataType
+import graduateProject.planner.entity.dataType.DataType
 
 trait VariableInformation{
   val name:String
