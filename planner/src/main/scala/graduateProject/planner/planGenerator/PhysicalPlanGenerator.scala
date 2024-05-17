@@ -1,4 +1,4 @@
-package graduateProject.planner.algorithm.planGenerator
+package graduateProject.planner.planGenerator
 
 import graduateProject.parser.CatalogManager
 import graduateProject.parser.implLib.ddl.SqlTable
@@ -479,6 +479,7 @@ object PhysicalPlanGenerator {
     val relationMapToVariable=mutable.Map[Relation,String]()
     val comparisonMapToInt=mutable.Map[Comparison,Int]()
     val variableManager=new VariableManager()
+    VariableManager.reset()
     val beforeAction=getBeforeActions(catalog, query, relationMapToVariable, comparisonMapToInt, variableManager)
     val cqcAction=getCqcActions(query,reduceInformationList,relationMapToVariable,
       comparisonMapToInt, variableManager)

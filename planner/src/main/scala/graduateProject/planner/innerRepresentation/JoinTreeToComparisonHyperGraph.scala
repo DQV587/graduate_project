@@ -1,4 +1,4 @@
-package graduateProject.planner.algorithm.innerRepresentation
+package graduateProject.planner.innerRepresentation
 
 import graduateProject.planner.entity.expression.Comparison
 import graduateProject.planner.entity.hypergraph.comparisonHypergraph.{ComparisonHyperGraph, ComparisonHyperGraphEdge}

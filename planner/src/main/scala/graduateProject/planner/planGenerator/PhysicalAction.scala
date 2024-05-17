@@ -1,4 +1,4 @@
-package graduateProject.planner.algorithm.planGenerator
+package graduateProject.planner.planGenerator
 
 import graduateProject.parser.implLib.ddl.SqlTable.TableColumn
 import graduateProject.planner.entity.dataType.DataType

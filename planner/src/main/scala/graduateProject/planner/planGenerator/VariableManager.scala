@@ -1,4 +1,4 @@
-package graduateProject.planner.algorithm.planGenerator
+package graduateProject.planner.planGenerator
 
 import graduateProject.planner.entity.dataType.DataType
 import graduateProject.planner.entity.physicalPlanVariable._
@@ -47,4 +47,5 @@ object VariableManager{
     num+=1;
     s"rdd${num}"
   }
+  def reset():Unit=num=0
 }

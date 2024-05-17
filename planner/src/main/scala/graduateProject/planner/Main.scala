@@ -3,10 +3,11 @@ package graduateProject.planner
 import graduateProject.parser.CatalogManager
 import graduateProject.parser.implLib.SQLParser
 import graduateProject.parser.plan.SqlPlanner
-import graduateProject.planner.algorithm.innerRepresentation.{GYO, JoinTreeToComparisonHyperGraph, RelNodeToQuery}
-import graduateProject.planner.algorithm.planGenerator.{PhysicalPlanGenerator, ReducePlanGenerator}
 import graduateProject.planner.codeGenerator.GenerateCode
 import graduateProject.planner.entity.hypergraph.relationHypergraph.RelationHyperGraph
+import graduateProject.planner.innerRepresentation.{GYO, JoinTreeToComparisonHyperGraph, RelNodeToQuery}
+import graduateProject.planner.optimizer.RedundantPlanRemove
+import graduateProject.planner.planGenerator.{PhysicalPlanGenerator, ReducePlanGenerator}
 
 import java.io.{File, PrintWriter}
 import scala.collection.mutable
@@ -39,11 +40,17 @@ object Main {
     val comparisonHyperGraph=acyclicCHG.head
     val reducePlanSet=ReducePlanGenerator(comparisonHyperGraph)
     println(reducePlanSet.size)
-    val physicalPlan=PhysicalPlanGenerator(catalogManager,query,reducePlanSet.head)
-    val builder=new mutable.StringBuilder()
-    GenerateCode(physicalPlan,builder)
-    val write = new PrintWriter(new File("experiment/src/main/scala/QueryProcess.scala"))
-    write.write(builder.toString())
-    write.close()
+    val newPlanList=RedundantPlanRemove(reducePlanSet)
+    println(newPlanList.size)
+    for(i <- newPlanList.indices){
+      val reducePlan=newPlanList(i)
+      val physicalPlan = PhysicalPlanGenerator(catalogManager, query, reducePlan)
+      val builder = new mutable.StringBuilder()
+      GenerateCode(physicalPlan, builder)
+      val write = new PrintWriter(new File(s"experiment/src/main/scala/QueryProcessPlan${i}.scala"))
+      write.write(builder.toString())
+      write.close()
+    }
+
   }
 }

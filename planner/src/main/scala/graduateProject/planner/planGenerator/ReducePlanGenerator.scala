@@ -1,4 +1,4 @@
-package graduateProject.planner.algorithm.planGenerator
+package graduateProject.planner.planGenerator
 
 import graduateProject.planner.entity.hypergraph.comparisonHypergraph.{ComparisonHyperGraph, ReduceInformation}
 import graduateProject.planner.entity.hypergraph.relationHypergraph.{AggregatedRelation, TableScanRelation}

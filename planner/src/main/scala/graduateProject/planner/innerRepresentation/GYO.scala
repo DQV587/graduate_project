@@ -1,4 +1,4 @@
-package graduateProject.planner.algorithm.innerRepresentation
+package graduateProject.planner.innerRepresentation
 
 import graduateProject.planner.entity.hypergraph.relationHypergraph.RelationHyperGraph
 import graduateProject.planner.entity.joinTree.JoinTree
