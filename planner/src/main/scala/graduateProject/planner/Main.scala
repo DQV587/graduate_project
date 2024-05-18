@@ -42,15 +42,22 @@ object Main {
     println(reducePlanSet.size)
     val newPlanList=RedundantPlanRemove(reducePlanSet)
     println(newPlanList.size)
-    for(i <- newPlanList.indices){
-      val reducePlan=newPlanList(i)
-      val physicalPlan = PhysicalPlanGenerator(catalogManager, query, reducePlan)
-      val builder = new mutable.StringBuilder()
-      GenerateCode(physicalPlan, builder)
-      val write = new PrintWriter(new File(s"experiment/src/main/scala/QueryProcessPlan${i}.scala"))
-      write.write(builder.toString())
-      write.close()
-    }
+    val reducePlan = newPlanList.last
+    val physicalPlan = PhysicalPlanGenerator(catalogManager, query, reducePlan)
+    val builder = new mutable.StringBuilder()
+    GenerateCode(physicalPlan, builder)
+    val write = new PrintWriter(new File(s"experiment/src/main/scala/QueryProcess.scala"))
+    write.write(builder.toString())
+    write.close()
+//    for(i <- newPlanList.indices){
+//      val reducePlan=newPlanList(i)
+//      val physicalPlan = PhysicalPlanGenerator(catalogManager, query, reducePlan)
+//      val builder = new mutable.StringBuilder()
+//      GenerateCode(physicalPlan, builder)
+//      val write = new PrintWriter(new File(s"experiment/src/main/scala/QueryProcessPlan${i}.scala"))
+//      write.write(builder.toString())
+//      write.close()
+//    }
 
   }
 }
